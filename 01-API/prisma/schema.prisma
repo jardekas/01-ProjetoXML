@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id         Int        @id @default(autoincrement())
+  idContador Int?
+  contador   contador?  @relation(fields: [idContador], references: [id])
+  id_empresa Int
+  EMPcpfCNPJ String     @db.VarChar(18)
+  hashCNPJ   String     @db.VarChar(64)
+  hashSen    String     @db.VarChar(64)
+  email      String     @db.VarChar(60)
+  cpf        String     @unique
+  name       String     @db.VarChar(60)
+  telefone   String?    @db.VarChar(20)
+  flg_conta  Boolean?   @default(false)
+  flg_admin  Boolean?   @default(false)
+  flg_ativo  Boolean    @default(true)
+  document   document[]
+  createdAt  DateTime   @default(now())
+
+  @@index([EMPcpfCNPJ])
+  @@index([hashCNPJ])
+  @@index([hashSen])
+  @@map("USER")
+}
+
+model contador {
+  id       Int                @id @default(autoincrement())
+  name     String             @db.VarChar(60)
+  cnpj     String             @unique @db.VarChar(18)
+  CRC      String?            @db.VarChar(20)
+  users    user[]
+  vinculos contador_empresa[]
+
+  @@map("CONTADOR")
+}
+
+model contador_empresa {
+  contadorId Int
+  cnpj       String @db.VarChar(18)
+  hashCNPJ   String @db.VarChar(64)
+
+  contador contador @relation(fields: [contadorId], references: [id])
+
+  @@id([contadorId, cnpj])
+  @@map("CONTADOR_EMPRESA")
+}
+
+model documentType {
+  id       Int             @id @default(autoincrement())
+  nome     String          @db.VarChar(60)
+  flgAtivo Boolean         @default(true)
+  totals   documentTotal[]
+
+  @@map("TIPO_DOC")
+}
+
+model document {
+  id         Int             @id @default(autoincrement())
+  EMPcpfCNPJ String          @db.VarChar(18)
+  nomeEmp    String?         @db.VarChar(100)
+  CNPJCli    String?         @db.VarChar(18)
+  nomeCli    String?         @db.VarChar(100)
+  tipoDoc    String?         @db.VarChar(30)
+  chave44    String          @db.VarChar(64)
+  baixado    Boolean         @default(false)
+  hashDoc    String          @db.VarChar(64)
+  idUser     Int?
+  user       user?           @relation(fields: [idUser], references: [id])
+  data       DateTime        @db.Date
+  nroDoc     Int
+  valor      Decimal         @default(0.0)
+  status     String?         @db.VarChar(30)
+  modelo     Int
+  caminho    String
+  dtCadastro DateTime        @default(now())
+  totals     documentTotal[]
+
+  @@index([data], name: "IDX_DOCUMENTO_DATA")
+  @@index([EMPcpfCNPJ])
+  @@index([idUser])
+  @@index([hashDoc])
+  @@map("DOCUMENTO")
+}
+
+model documentTotal {
+  id        Int          @id @default(autoincrement())
+  idDoc     Int
+  idTipo    Int
+  documento document     @relation(fields: [idDoc], references: [id])
+  tipo      documentType @relation(fields: [idTipo], references: [id])
+  conteudo  String?
+  valor     Decimal?
+
+  @@index([valor], name: "IDX_TOTAL_DOC_VALOR")
+  @@map("TOTAL_DOC")
+}
+
+model empresa {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(60)
+  cpfCNPJ         String            @unique @db.VarChar(18)
+  EMAIL           String?           @db.VarChar(100)
+  TELEFONE        String?           @db.VarChar(20)
+  flg_ativo       Boolean           @default(true)
+  document        String? //Caminho onde arquivo foi salvo no servidor
+  empresaDocument empresaDocument[]
+
+  @@map("EMPRESA")
+}
+
+model empresaDocument {
+  id        Int     @id @default(autoincrement())
+  idEmpresa Int
+  empresa   empresa @relation(fields: [idEmpresa], references: [id])
+  documento String
+
+  @@map("EMPRESA_DOCUMENTO")
+}

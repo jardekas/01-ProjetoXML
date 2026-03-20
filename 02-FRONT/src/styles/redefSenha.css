@@ -1,0 +1,170 @@
+/* Container principal */
+.redefinir-container {
+  min-height: 100vh;
+  background: #0f1117;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+/* Card central */
+.redefinir-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 40px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.5s ease;
+}
+
+/* Animação de entrada */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Título */
+.redefinir-title {
+  margin-bottom: 20px;
+  color: #f1f5f9;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Texto descritivo */
+.redefinir-text {
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 30px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Formulário */
+.redefinir-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Campo de input */
+.redefinir-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: #f1f5f9;
+  font-size: 14px;
+  font-family: "DM Sans", sans-serif;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.redefinir-input:focus {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.redefinir-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* Botão principal */
+.redefinir-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+  margin-bottom: 5px;
+}
+
+.redefinir-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+}
+
+.redefinir-button:active {
+  transform: translateY(0);
+}
+
+/* Botão voltar */
+.voltar-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 14px;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 8px;
+  transition: color 0.2s ease;
+  margin-top: 10px;
+}
+
+.voltar-button:hover {
+  color: #60a5fa;
+}
+
+/* Mensagem de sucesso */
+.success-message {
+  color: #3b82f6;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  font-size: 14px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .redefinir-card {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+
+  .redefinir-title {
+    font-size: 22px;
+  }
+
+  .redefinir-text {
+    font-size: 13px;
+  }
+}

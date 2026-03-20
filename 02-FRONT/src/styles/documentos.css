@@ -1,0 +1,100 @@
+/* Estilos específicos para a página de documentos */
+.documentos-container {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  color: #0f172a;
+}
+
+/* Botão de importar */
+.import-btn {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Outfit", sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.import-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
+/* Botões de ação na tabela */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 7px;
+  border-radius: 8px;
+  color: #64748b;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+}
+
+.action-btn:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Checkbox da tabela */
+.row-check {
+  width: 16px;
+  height: 16px;
+  accent-color: #1d4ed8;
+  cursor: pointer;
+}
+
+/* Input de filtro */
+.input-f {
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 9px 12px 9px 36px;
+  font-size: 13.5px;
+  font-family: "Outfit", sans-serif;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.input-f:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-f::placeholder {
+  color: #94a3b8;
+}
+
+/* Select de filtro */
+.select-f {
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 13.5px;
+  font-family: "Outfit", sans-serif;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  appearance: none;
+}
+
+.select-f:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
