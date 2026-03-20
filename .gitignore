@@ -1,2 +1,4 @@
+01-API/uploads/
+.env
 /node_modules
 /user_xml.txt
