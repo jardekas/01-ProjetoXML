@@ -29,6 +29,29 @@
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
 
+/* Botão de Impressão */
+.impress-btn {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Outfit", sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.impress-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
 /* Botões de ação na tabela */
 .action-btn {
   background: none;

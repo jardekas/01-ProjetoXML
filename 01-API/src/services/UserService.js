@@ -3,7 +3,27 @@ import { UserModel } from "../models/UserModel.js";
 import { ContadorModel } from "../models/ContadorModel.js";
 import { gerarHash } from "../utils/hash.js";
 
-export const createUserService = async (dados) => {
+export const createUserService = async (dados, solicitante) => {
+  const isMaster = solicitante?.flg_master;
+  const isContador = solicitante?.flg_conta;
+  const isAdm = solicitante?.flg_admin;
+
+  if (isContador && !dados.flg_conta) {
+    throw new Error(
+      "Seu usuário só tem permissão para criar outros com o mesmo Tipo.(Contador)",
+    );
+  }
+  if (isAdm && !isMaster && dados.flg_conta) {
+    throw new Error(
+      "Seu usuário só tem permissão para criar Usuários de mesmo nível ou inferior.(Admin)",
+    );
+  }
+  if (isAdm && !isMaster && dados.flg_master) {
+    throw new Error(
+      "Seu usuário só tem permissão para criar Usuários de mesmo nível ou inferior.(Admin)",
+    );
+  }
+
   const hashCNPJ = gerarHash(dados.EMPcpfCNPJ);
   const hashSen = gerarHash(dados.senha);
 
@@ -28,6 +48,7 @@ export const createUserService = async (dados) => {
     telefone: dados.telefone,
     flg_conta: dados.flg_conta,
     flg_admin: dados?.flg_admin,
+    flg_master: isMaster ? dados.flg_master || false : false,
   });
   return user;
 };

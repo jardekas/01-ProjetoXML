@@ -5,6 +5,7 @@ import StatsCard from "../components/StatsCard";
 import FilterBar from "../components/FilterBar";
 import DocumentTable from "../components/DocumentTable";
 import ImportModal from "../components/ImportModal";
+import ImpressModal from "../components/ImpressModal";
 import "../styles/documentos.css";
 
 export default function Documentos() {
@@ -26,6 +27,7 @@ export default function Documentos() {
   const [sortDir, setSortDir] = useState("asc");
   const [selected, setSelected] = useState([]);
   const [importModal, setImportModal] = useState(false);
+  const [impressModal, setImpressModal] = useState(false);
 
   const loadDocumentos = useCallback(() => {
     if (!user?.EMPcpfCNPJ) return;
@@ -207,21 +209,42 @@ export default function Documentos() {
               Gerencie XMLs e documentos fiscais
             </p>
           </div>
-          <button className="import-btn" onClick={() => setImportModal(true)}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
+          <div style={{ display: "flex", gap: 12 }}>
+            <button
+              className="impress-btn"
+              onClick={() => setImpressModal(true)}
             >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            Importar XMLs
-          </button>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <path d="M6 9V3h12v6" />
+                <rect x="6" y="15" width="12" height="6" rx="2" />
+              </svg>
+              Relatório
+            </button>
+
+            <button className="import-btn" onClick={() => setImportModal(true)}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Importar XMLs
+            </button>
+          </div>
         </div>
 
         {erro && (
@@ -361,6 +384,10 @@ export default function Documentos() {
       </main>
 
       <ImportModal isOpen={importModal} onClose={() => setImportModal(false)} />
+      <ImpressModal
+        isOpen={impressModal}
+        onClose={() => setImpressModal(false)}
+      />
     </div>
   );
 }

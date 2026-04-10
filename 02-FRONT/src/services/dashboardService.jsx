@@ -34,7 +34,13 @@ const mapStatus = (status) => {
 };
 
 export const dashboardService = {
-  async getDados(user, periodo = "", tipo = "Todos os tipos", cliente = "") {
+  async getDados(
+    user,
+    dataInicio = null,
+    dataFim = null,
+    tipo = "Todos os tipos",
+    cliente = "",
+  ) {
     const isContador = user?.flg_conta && user?.idContador;
     const params = new URLSearchParams({ todos: true });
     if (isContador) {
@@ -45,15 +51,13 @@ export const dashboardService = {
 
     const response = await api.get(`/document?${params.toString()}`);
     let docs = Array.isArray(response.data) ? response.data : [];
-    if (periodo) {
-      const hoje = new Date();
-      const de = new Date();
-      if (periodo === "Este mês") de.setDate(1);
-      if (periodo === "Últimos 3 meses") de.setMonth(hoje.getMonth() - 3);
-      if (periodo === "Últimos 6 meses") de.setMonth(hoje.getMonth() - 6);
-      if (periodo === "Este ano") de.setMonth(0, 1);
 
-      docs = docs.filter((d) => d.data && new Date(d.data) >= de);
+    if (dataInicio && dataFim) {
+      docs = docs.filter((d) => {
+        if (!d.data) return false;
+        const dt = new Date(d.data);
+        return dt >= new Date(dataInicio) && dt <= new Date(dataFim);
+      });
     }
 
     if (tipo && tipo !== "Todos os tipos") {

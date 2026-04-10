@@ -13,6 +13,10 @@ export default function FilterBar({
   tipos,
   clientes,
   onClearFilters,
+  dataInicio,
+  setDataInicio,
+  dataFim,
+  setDataFim,
 
   // Props para a página de Documentos
   busca,
@@ -29,6 +33,7 @@ export default function FilterBar({
   // Props comuns
   openSelect,
   setOpenSelect,
+  setFiltrosAbertos,
 }) {
   // Determina qual layout renderizar baseado nas props recebidas
   const isDashboardLayout = periodo !== undefined && setPeriodo !== undefined;
@@ -71,6 +76,45 @@ export default function FilterBar({
           <span style={{ fontSize: 15, fontWeight: 700, zIndex: 100 }}>
             Filtros
           </span>
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: "#64748b",
+              marginBottom: 8,
+              textTransform: "uppercase",
+            }}
+          >
+            Data Início
+          </div>
+          <input
+            type="date"
+            className="input-f"
+            value={dataInicio}
+            onChange={(e) => setDataInicio(e.target.value)}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: "#64748b",
+              marginBottom: 8,
+              textTransform: "uppercase",
+            }}
+          >
+            Data Fim
+          </div>
+          <input
+            type="date"
+            className="input-f"
+            value={dataFim}
+            onChange={(e) => setDataFim(e.target.value)}
+          />
         </div>
 
         <div
@@ -153,7 +197,7 @@ export default function FilterBar({
               setOpenSelect={setOpenSelect}
             />
           </div>
-
+          <button onClick={() => setFiltrosAbertos(false)}>▲</button>
           <button
             onClick={onClearFilters}
             style={{
@@ -509,6 +553,10 @@ FilterBar.propTypes = {
   tipos: PropTypes.array,
   clientes: PropTypes.array,
   onApply: PropTypes.func,
+  dataInicio: PropTypes.string,
+  setDataInicio: PropTypes.func,
+  dataFim: PropTypes.string,
+  setDataFim: PropTypes.func,
 
   // Props para a página de Documentos
   busca: PropTypes.string,
@@ -526,4 +574,5 @@ FilterBar.propTypes = {
   // Props comuns
   openSelect: PropTypes.string,
   setOpenSelect: PropTypes.func,
+  setFiltrosAbertos: PropTypes.func,
 };

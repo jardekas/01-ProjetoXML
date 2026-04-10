@@ -8,6 +8,7 @@ import {
 
 export const createUser = async (req, res) => {
   try {
+    const solicitante = req.body;
     const user = await createUserService(req.body);
     res.json({
       message: "Usuário cadastrado com sucesso",

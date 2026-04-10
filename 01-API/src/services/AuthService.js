@@ -30,5 +30,6 @@ export const loginService = async (email, senha) => {
     id_empresa: user.id_empresa,
     flg_admin: user.flg_admin,
     flg_conta: user.flg_conta,
+    flg_master: user.flg_master,
   };
 };

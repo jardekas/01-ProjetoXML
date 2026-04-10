@@ -30,7 +30,6 @@ export const downloadXMLsService = async (idUser, EMPcpfCNPJ, ids, res) => {
     throw new Error("Usuário não encontrado.");
   }
 
-  const hashUser = user.hashCNPJ;
   const docs = await DocModel.findByUserAndIds(EMPcpfCNPJ, ids);
   if (!docs.length) {
     throw new Error(
@@ -38,10 +37,13 @@ export const downloadXMLsService = async (idUser, EMPcpfCNPJ, ids, res) => {
     );
   }
 
-  // valida hash do documento
-  for (const doc of docs) {
-    if (doc.hashDoc !== hashUser) {
-      throw new Error("Configuração de cadastro inválido.");
+  if (!user.flg_master) {
+    // valida hash do documento
+    const hashUser = user.hashCNPJ;
+    for (const doc of docs) {
+      if (doc.hashDoc !== hashUser) {
+        throw new Error("Configuração de cadastro inválido.");
+      }
     }
   }
 

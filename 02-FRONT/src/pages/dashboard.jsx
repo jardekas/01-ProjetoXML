@@ -15,10 +15,16 @@ import "../styles/dashboard.css";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [periodo, setPeriodo] = useState("");
+  const hoje = new Date();
+  const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const [dataInicio, setDataInicio] = useState(
+    primeiroDiaMes.toISOString().slice(0, 10),
+  );
+  const [dataFim, setDataFim] = useState(hoje.toISOString().slice(0, 10));
   const [tipo, setTipo] = useState("Todos os tipos");
   const [cliente, setCliente] = useState("");
   const [openSelect, setOpenSelect] = useState(null);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(true);
   const [barData, setBarData] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [kpiData, setKpiData] = useState([]);
@@ -26,7 +32,8 @@ export default function Dashboard() {
   const [clientes, setClientes] = useState([]);
 
   const handleClearFilters = () => {
-    setPeriodo("");
+    setDataInicio(primeiroDiaMes.toISOString().slice(0, 10));
+    setDataFim(hoje.toISOString().slice(0, 10));
     setTipo("Todos os tipos");
     setCliente("");
   };
@@ -36,7 +43,7 @@ export default function Dashboard() {
     if (!isContador && !user?.EMPcpfCNPJ) return;
     setLoading(true);
     dashboardService
-      .getDados(user, periodo, tipo, cliente)
+      .getDados(user, dataInicio, dataFim, tipo, cliente)
       .then(({ barData, pieData, kpiData, clientes }) => {
         setBarData(barData);
         setPieData(pieData);
@@ -45,7 +52,7 @@ export default function Dashboard() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [user, periodo, tipo, cliente]);
+  }, [user, dataInicio, dataFim, tipo, cliente]);
 
   useEffect(() => {
     loadDados();
@@ -66,15 +73,12 @@ export default function Dashboard() {
         {/* Header igual */}
 
         <FilterBar
-          periodo={periodo}
-          setPeriodo={setPeriodo}
           tipo={tipo}
           setTipo={setTipo}
           cliente={cliente}
           setCliente={setCliente}
           openSelect={openSelect}
           setOpenSelect={setOpenSelect}
-          periodos={PERIODOS}
           tipos={TIPOS}
           clientes={clientes}
           onApply={loadDados}

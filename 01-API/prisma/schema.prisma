@@ -29,6 +29,7 @@ model user {
   flg_admin  Boolean?   @default(false)
   flg_ativo  Boolean    @default(true)
   document   document[]
+  flg_master Boolean?   @default(false)
   createdAt  DateTime   @default(now())
 
   @@index([EMPcpfCNPJ])
@@ -38,12 +39,14 @@ model user {
 }
 
 model contador {
-  id       Int                @id @default(autoincrement())
-  name     String             @db.VarChar(60)
-  cnpj     String             @unique @db.VarChar(18)
-  CRC      String?            @db.VarChar(20)
-  users    user[]
-  vinculos contador_empresa[]
+  id        Int                @id @default(autoincrement())
+  name      String             @db.VarChar(60)
+  cnpj      String             @unique @db.VarChar(18)
+  CRC       String?            @db.VarChar(20)
+  empresaId Int?
+  empresa   empresa?           @relation(fields: [empresaId], references: [id])
+  users     user[]
+  vinculos  contador_empresa[]
 
   @@map("CONTADOR")
 }
@@ -117,6 +120,7 @@ model empresa {
   TELEFONE        String?           @db.VarChar(20)
   flg_ativo       Boolean           @default(true)
   document        String? //Caminho onde arquivo foi salvo no servidor
+  contadores      contador[]
   empresaDocument empresaDocument[]
 
   @@map("EMPRESA")

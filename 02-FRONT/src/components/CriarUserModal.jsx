@@ -1,17 +1,23 @@
 import PropTypes from "prop-types";
-import { EMPTY_USER, PERMISSOES } from "../services/usuariosService";
+import { PERMISSOES } from "../services/usuariosService";
 import { maskCPF, maskCNPJ, maskPhone } from "../utils/mask";
 
 export default function UserModal({
   modal,
   form,
   setForm,
-  editId,
   onClose,
   onSave,
   onConfirmDelete,
   isContadorDelete = false,
+  podecriarContador = false,
+  podecriarMaster = false,
 }) {
+  const tiposDisponiveis = [
+    ...(!podecriarContador ? ["Empresa"] : []),
+    ...(podecriarContador ? ["Contador"] : []),
+    ...(podecriarMaster ? ["Master"] : []),
+  ];
   const handleFormChange = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
   };
@@ -111,25 +117,25 @@ export default function UserModal({
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {[
                 {
-                  label: "Nome completo",
+                  label: "Nome completo*",
                   key: "nome",
                   placeholder: "Ex: Maria Santos",
                   mask: null,
                 },
                 {
-                  label: "CPF",
+                  label: "CPF*",
                   key: "cpf",
                   placeholder: "000.000.000-00",
                   mask: maskCPF,
                 },
                 {
-                  label: "CNPJ",
+                  label: "CNPJ*",
                   key: "cnpj",
                   placeholder: "00.000.000/0000-00",
                   mask: maskCNPJ,
                 },
                 {
-                  label: "E-mail",
+                  label: "E-mail*",
                   key: "email",
                   placeholder: "usuario@empresa.com",
                   mask: null,
@@ -151,7 +157,7 @@ export default function UserModal({
                     ]
                   : []),
                 {
-                  label: "Senha",
+                  label: "Senha*",
                   key: "senha",
                   placeholder: "Mínimo 6 caracteres",
                   mask: null,
@@ -200,8 +206,14 @@ export default function UserModal({
                 }}
               >
                 {[
-                  { label: "Tipo", key: "tipo", opts: ["Empresa", "Contador"] },
-                ].map(({ label, key, opts }) => (
+                  {
+                    label: "Tipo",
+                    key: "tipo",
+                    tiposDisponiveis: ["Empresa", "Contador", "Master"].filter(
+                      (t) => tiposDisponiveis.includes(t),
+                    ),
+                  },
+                ].map(({ label, key, tiposDisponiveis }) => (
                   <div key={key}>
                     <label
                       style={{
@@ -222,7 +234,7 @@ export default function UserModal({
                         value={form[key]}
                         onChange={(e) => handleFormChange(key, e.target.value)}
                       >
-                        {opts.map((o) => (
+                        {tiposDisponiveis.map((o) => (
                           <option key={o}>{o}</option>
                         ))}
                       </select>
@@ -485,6 +497,8 @@ UserModal.propTypes = {
   setForm: PropTypes.func,
   editId: PropTypes.number,
   isContadorDelete: PropTypes.bool,
+  podecriarContador: PropTypes.bool,
+  podecriarMaster: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onConfirmDelete: PropTypes.func.isRequired,

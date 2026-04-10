@@ -96,6 +96,7 @@ export default function Sidebar() {
       label: "Usuários",
       path: "/usuarios",
       adminOnly: true,
+      masterOnly: true,
     },
     {
       icon: (
@@ -160,7 +161,13 @@ export default function Sidebar() {
 
       {/* Itens do Menu */}
       {menuItems
-        .filter((item) => !item.adminOnly || user?.flg_admin)
+        .filter((item) => {
+          if (item.adminOnly && !user?.flg_admin && !user?.flg_master)
+            return false;
+          if (item.masterOnly && !user?.flg_master) return false;
+          if (item.contaOnly && !user?.flg_conta) return false;
+          return true;
+        })
         .map(({ icon, label, path }) => {
           const active = isActive(path);
 

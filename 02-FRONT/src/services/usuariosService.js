@@ -21,6 +21,7 @@ export const STATUS_STYLES = {
 // Estilos para tipo de usuário
 export const TIPO_STYLES = {
   Admin: { bg: "#dc2626", text: "white" },
+  Master: { bg: "#7c3aed", text: "white" },
   Usuário: { bg: "transparent", text: "#475569", border: "none" },
   Empresa: { bg: "#059669", text: "white" },
   Contador: { bg: "#b45309", text: "white" },
@@ -62,6 +63,8 @@ export const getStats = (users) => {
     ativos: String(users.filter((u) => u.status === "Ativo").length),
     inativos: String(users.filter((u) => u.status === "Inativo").length),
     admins: String(users.filter((u) => u.tipo === "Admin").length),
+    contadores: String(users.filter((u) => u.tipo === "Contador").length),
+    masters: String(users.filter((u) => u.tipo === "Master").length),
   };
 };
 

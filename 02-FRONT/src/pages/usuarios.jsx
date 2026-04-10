@@ -9,6 +9,18 @@ import { userService } from "../services/userService";
 import { USERS_MOCK, getStats, EMPTY_USER } from "../services/usuariosService"; // Importa os dados mockados e a função de estatísticas
 import "../styles/usuarios.css";
 
+const mapBackToFront = (user) => ({
+  id: user.id,
+  nome: user.nome,
+  email: user.email,
+  cpf: user.cpf,
+  cnpj: user.cnpj,
+  telefone: user.telefone,
+  tipo: user.tipo,
+  idContador: user.idContador,
+  ativo: user.ativo,
+});
+
 export default function Usuarios() {
   const { user } = useAuth();
   const [adcContadorModal, setAdcContadorModal] = useState(false);
@@ -21,23 +33,29 @@ export default function Usuarios() {
   const [hoverRow, setHoverRow] = useState(null);
   const [search, setSearch] = useState("");
   const [isContadorDelete, setIsContadorDelete] = useState(false);
+  const isMaster = user?.flg_master;
+  const isContador = user?.flg_conta;
+  const isAdm = user?.flg_admin;
+  const podeVerTudo = isAdm || isMaster;
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await userService.getUsers(user?.EMPcpfCNPJ);
-      console.log("Usuários carregados:", data);
+      let data;
+      if (isMaster) {
+        data = await userService.getUsers(); // todos
+      } else if (isContador) {
+        data = await userService.getUsers(user.EMPcpfCNPJ); // vinculados
+      } else {
+        data = await userService.getUsers(user.EMPcpfCNPJ); // mesmo CNPJ
+      }
       setUsers(data);
-    } catch (error) {
-      console.error(
-        "Erro ao carregar usuários:",
-        error.response?.data || error.message,
-      ); //dados mockados para apresentação.
+    } catch {
       setUsers(USERS_MOCK);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [isContador, isMaster, user]);
 
   useEffect(() => {
     loadUsers();
@@ -53,7 +71,8 @@ export default function Usuarios() {
   const stats = getStats(users);
 
   const openNew = () => {
-    setForm(EMPTY_USER);
+    const tipoDefault = isContador ? "Contador" : "Empresa";
+    setForm({ ...EMPTY_USER, tipo: tipoDefault });
     setEditId(null);
     setModal("new");
   };
@@ -207,37 +226,41 @@ export default function Usuarios() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn-primary" onClick={openNew}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
+            {podeVerTudo && (
+              <button className="btn-primary" onClick={openNew}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Novo Usuário
+              </button>
+            )}
+            {isMaster && (
+              <button
+                className="btn-primary"
+                onClick={() => setAdcContadorModal(true)}
               >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Novo Usuário
-            </button>
-            <button
-              className="btn-primary"
-              onClick={() => setAdcContadorModal(true)}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Adc Contador
-            </button>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Adc Contador
+              </button>
+            )}
           </div>
         </div>
 
@@ -445,6 +468,8 @@ export default function Usuarios() {
         onSave={saveUser}
         onConfirmDelete={confirmDelete}
         isContadorDelete={isContadorDelete}
+        podecriarContador={isMaster || isContador}
+        podecriarMaster={isMaster}
       />
       <AdcContadorModal
         isOpen={adcContadorModal}
