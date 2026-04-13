@@ -1,5 +1,12 @@
 import PropTypes from "prop-types";
-export default function StatsCard({ icon, bgColor, value, label }) {
+export default function StatsCard({
+  icon,
+  bgColor,
+  value,
+  label,
+  clickable,
+  onClick,
+}) {
   return (
     <div
       style={{
@@ -12,8 +19,9 @@ export default function StatsCard({ icon, bgColor, value, label }) {
         border: "1px solid #e2e8f0",
         boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
         transition: "all 0.2s",
-        cursor: "default",
+        cursor: clickable ? "pointer" : "default",
       }}
+      onClick={clickable ? onClick : undefined}
     >
       <div
         style={{
@@ -60,4 +68,6 @@ StatsCard.propTypes = {
   bgColor: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   label: PropTypes.string.isRequired,
+  clickable: PropTypes.bool,
+  onClick: PropTypes.func,
 };
