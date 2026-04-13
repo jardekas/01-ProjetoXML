@@ -25,6 +25,7 @@ export default function FilterBar({
   setNumDoc,
   clienteFiltro,
   setClienteFiltro,
+  clientesList,
   tipoFiltro,
   setTipoFiltro,
   statusFiltro,
@@ -33,7 +34,6 @@ export default function FilterBar({
   // Props comuns
   openSelect,
   setOpenSelect,
-  setFiltrosAbertos,
 }) {
   // Determina qual layout renderizar baseado nas props recebidas
   const isDashboardLayout = periodo !== undefined && setPeriodo !== undefined;
@@ -78,43 +78,46 @@ export default function FilterBar({
           </span>
         </div>
 
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              fontSize: 12.5,
-              fontWeight: 600,
-              color: "#64748b",
-              marginBottom: 8,
-              textTransform: "uppercase",
-            }}
-          >
-            Data Início
+        {/* Container flex para Data Início e Data Fim */}
+        <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: "#64748b",
+                marginBottom: 8,
+                textTransform: "uppercase",
+              }}
+            >
+              Data Início
+            </div>
+            <input
+              type="date"
+              className="input-f"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+            />
           </div>
-          <input
-            type="date"
-            className="input-f"
-            value={dataInicio}
-            onChange={(e) => setDataInicio(e.target.value)}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              fontSize: 12.5,
-              fontWeight: 600,
-              color: "#64748b",
-              marginBottom: 8,
-              textTransform: "uppercase",
-            }}
-          >
-            Data Fim
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: "#64748b",
+                marginBottom: 8,
+                textTransform: "uppercase",
+              }}
+            >
+              Data Fim
+            </div>
+            <input
+              type="date"
+              className="input-f"
+              value={dataFim}
+              onChange={(e) => setDataFim(e.target.value)}
+            />
           </div>
-          <input
-            type="date"
-            className="input-f"
-            value={dataFim}
-            onChange={(e) => setDataFim(e.target.value)}
-          />
         </div>
 
         <div
@@ -197,7 +200,6 @@ export default function FilterBar({
               setOpenSelect={setOpenSelect}
             />
           </div>
-          <button onClick={() => setFiltrosAbertos(false)}>▲</button>
           <button
             onClick={onClearFilters}
             style={{
@@ -271,7 +273,7 @@ export default function FilterBar({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1.4fr 0.8fr 0.8fr",
+          gridTemplateColumns: "1fr 1fr 1.6fr 0.8fr 0.8fr",
           gap: 14,
           alignItems: "end",
         }}
@@ -392,41 +394,18 @@ export default function FilterBar({
           >
             Cliente
           </div>
-          <div style={{ position: "relative" }}>
-            <svg
-              style={{
-                position: "absolute",
-                left: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-              }}
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#94a3b8"
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <input
-              className="input-f"
-              value={clienteFiltro}
-              onChange={(e) => setClienteFiltro(e.target.value)}
-              placeholder="Selecione um cliente..."
-              style={{
-                background: "white",
-                border: "1.5px solid #e2e8f0",
-                borderRadius: 9,
-                padding: "9px 12px 9px 36px",
-                fontSize: 13.5,
-                width: "100%",
-                outline: "none",
-              }}
-            />
-          </div>
+          <SelectDropdown
+            id="clienteFiltro"
+            value={clienteFiltro}
+            setValue={setClienteFiltro}
+            options={[
+              { value: "", label: "Todos os clientes" },
+              ...(clientesList || []),
+            ]}
+            placeholder="Selecione um cliente..."
+            openSelect={openSelect}
+            setOpenSelect={setOpenSelect}
+          />
         </div>
 
         {/* Tipo */}
@@ -565,6 +544,7 @@ FilterBar.propTypes = {
   setNumDoc: PropTypes.func,
   clienteFiltro: PropTypes.string,
   setClienteFiltro: PropTypes.func,
+  clientesList: PropTypes.array,
   tipoFiltro: PropTypes.string,
   setTipoFiltro: PropTypes.func,
   statusFiltro: PropTypes.string,

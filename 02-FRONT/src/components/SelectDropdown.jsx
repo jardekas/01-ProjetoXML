@@ -11,17 +11,43 @@ export default function SelectDropdown({
 }) {
   const isOpen = openSelect === id;
 
+  const handleToggle = (e) => {
+    e.stopPropagation(); // evita que clique feche imediatamente
+    setOpenSelect(isOpen ? null : id);
+  };
+
+  const handleOptionClick = (option) => (e) => {
+    e.stopPropagation();
+    const newValue = typeof option === "object" ? option.value : option;
+    setValue(newValue);
+    setOpenSelect(null);
+  };
+
+  const getDisplayLabel = () => {
+    if (!value) return placeholder;
+    const selectedOption = options.find((opt) =>
+      typeof opt === "object" ? opt.value === value : opt === value,
+    );
+    if (selectedOption) {
+      return typeof selectedOption === "object"
+        ? selectedOption.label
+        : selectedOption;
+    }
+    return value;
+  };
+
   return (
     <div style={{ position: "relative", flex: 1 }}>
       <button
-        onClick={() => setOpenSelect(isOpen ? null : id)}
+        type="button"
+        onClick={handleToggle}
         style={{
           width: "100%",
           background: "white",
           border: `1.5px solid ${isOpen ? "#1d4ed8" : "#e2e8f0"}`,
           borderRadius: 9,
-          padding: "10px 14px",
-          fontSize: 14,
+          padding: "9px 12px",
+          fontSize: 13.5,
           fontFamily: "'Outfit',sans-serif",
           color: value ? "#0f172a" : "#94a3b8",
           cursor: "pointer",
@@ -31,9 +57,10 @@ export default function SelectDropdown({
           gap: 8,
           boxShadow: isOpen ? "0 0 0 3px rgba(29,78,216,0.1)" : "none",
           transition: "all 0.2s",
+          pointerEvents: "auto",
         }}
       >
-        <span>{value || placeholder}</span>
+        <span>{getDisplayLabel()}</span>
         <svg
           width="14"
           height="14"
@@ -66,34 +93,38 @@ export default function SelectDropdown({
             overflow: "hidden",
             animation: "dropIn 0.15s ease",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          {options.map((opt) => (
-            <div
-              key={opt}
-              onClick={() => {
-                setValue(opt);
-                setOpenSelect(null);
-              }}
-              style={{
-                padding: "10px 14px",
-                fontSize: 14,
-                cursor: "pointer",
-                color: value === opt ? "#1d4ed8" : "#374151",
-                background: value === opt ? "#eff6ff" : "transparent",
-                fontWeight: value === opt ? 600 : 400,
-                transition: "background 0.12s",
-              }}
-              onMouseEnter={(e) => {
-                if (value !== opt) e.currentTarget.style.background = "#f8fafc";
-              }}
-              onMouseLeave={(e) => {
-                if (value !== opt)
-                  e.currentTarget.style.background = "transparent";
-              }}
-            >
-              {opt}
-            </div>
-          ))}
+          {options.map((opt) => {
+            const optValue = typeof opt === "object" ? opt.value : opt;
+            const optLabel = typeof opt === "object" ? opt.label : opt;
+            const isSelected = value === optValue;
+
+            return (
+              <div
+                key={optValue}
+                onClick={handleOptionClick(opt)}
+                style={{
+                  padding: "10px 14px",
+                  fontSize: 14,
+                  cursor: "pointer",
+                  color: isSelected ? "#1d4ed8" : "#374151",
+                  background: isSelected ? "#eff6ff" : "transparent",
+                  fontWeight: isSelected ? 600 : 400,
+                  transition: "background 0.12s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) e.currentTarget.style.background = "#f8fafc";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected)
+                    e.currentTarget.style.background = "transparent";
+                }}
+              >
+                {optLabel}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -104,7 +135,12 @@ SelectDropdown.propTypes = {
   id: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   setValue: PropTypes.func.isRequired,
-  options: PropTypes.array.isRequired,
+  options: PropTypes.arrayOf(
+    PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({ value: PropTypes.string, label: PropTypes.string }),
+    ]),
+  ).isRequired,
   placeholder: PropTypes.string.isRequired,
   openSelect: PropTypes.string,
   setOpenSelect: PropTypes.func.isRequired,
