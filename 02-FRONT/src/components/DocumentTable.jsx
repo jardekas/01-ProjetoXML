@@ -6,10 +6,7 @@ import {
   STATUS_STYLE,
   formatCurrency,
 } from "../services/documentServices";
-
-{
-  /* Arquivo destinado a alterar as colunas para exibir os documentos. Trecho de chave 44, cliente, documento, etc;*/
-}
+import { abrirDanfe } from "../utils/danfeUtils";
 
 const SortIcon = ({ col, sortCol, sortDir }) => (
   <svg
@@ -51,18 +48,15 @@ function DocumentTable({
   onRefresh,
 }) {
   const [hoverRow, setHoverRow] = useState(null);
-  const [docVisualizar, setDocVisualizar] = useState(null);
-  const [xmlContent, setXmlContent] = useState("");
   const [loadingXml, setLoadingXml] = useState(false);
 
   const handleVisualizar = async (doc) => {
-    setDocVisualizar(doc);
     setLoadingXml(true);
     try {
       const response = await api.get(`/document/visualizar/${doc.id}`);
-      setXmlContent(response.data.xml);
-    } catch {
-      setXmlContent("Erro ao carregar o XML.");
+      await abrirDanfe(response.data.xml);
+    } catch (error) {
+      alert("Erro ao carregar XML: " + error.message);
     } finally {
       setLoadingXml(false);
     }
@@ -70,14 +64,12 @@ function DocumentTable({
 
   const handleDownloadSelecionados = async () => {
     if (!selected.length) return;
-
     try {
-      const ids = selected.join(","); // "41,42,43"
+      const ids = selected.join(",");
       const response = await api.get(
         `/document/${user.id}/${user.EMPcpfCNPJ}/download?id=${ids}`,
         { responseType: "blob" },
       );
-
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -89,14 +81,7 @@ function DocumentTable({
       await api.patch("/document/baixado", { ids: selected });
       onRefresh();
     } catch (err) {
-      if (err.response?.data instanceof Blob) {
-        const text = await err.response.data.text();
-        alert(`Erro: ${text}`);
-      } else {
-        alert(
-          `Erro ${err.response?.status}: ${err.response?.data?.error || err.message}`,
-        );
-      }
+      alert(`Erro: ${err.response?.data?.error || err.message}`);
     }
   };
 
@@ -104,10 +89,8 @@ function DocumentTable({
     try {
       const response = await api.get(
         `/document/${user.id}/${user.EMPcpfCNPJ}/download?id=${docId}`,
-        { responseType: "blob" }, // necessário para receber arquivo
+        { responseType: "blob" },
       );
-
-      // Cria link e dispara download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -119,10 +102,7 @@ function DocumentTable({
       await api.patch("/document/baixado", { ids: [docId] });
       onRefresh();
     } catch (err) {
-      console.error("Erro download:", err.response?.status, err.response?.data);
-      alert(
-        `Erro ${err.response?.status}: ${err.response?.data?.error || err.message}`,
-      );
+      alert(`Erro: ${err.response?.data?.error || err.message}`);
     }
   };
 
@@ -136,6 +116,7 @@ function DocumentTable({
         overflow: "hidden",
       }}
     >
+      {/* Cabeçalho da tabela */}
       <div
         style={{
           padding: "18px 24px 16px",
@@ -191,7 +172,7 @@ function DocumentTable({
               {selected.length} selecionado{selected.length > 1 ? "s" : ""}
             </span>
             <button
-              onClick={() => handleDownloadSelecionados()}
+              onClick={handleDownloadSelecionados}
               style={{
                 background: "rgba(255,255,255,0.12)",
                 border: "none",
@@ -336,80 +317,50 @@ function DocumentTable({
                       }}
                     />
                   </td>
-
-                  {/* Chave 44 */}
-                  <td style={{ padding: "14px 16px" }}>
+                  <td style={{ padding: "14px 5px" }}>
                     <div
-                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                      style={{ display: "flex", alignItems: "center", gap: 8 }}
                     >
-                      <div
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke={sc.dot}
+                        strokeWidth="2.5"
+                      >
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                      <span
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
+                          background: tc.bg,
+                          color: tc.text,
+                          fontSize: 11,
+                          borderRadius: 6,
+                          padding: "3px 8px",
+                          fontFamily: "'JetBrains Mono', monospace",
                         }}
                       >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={sc.dot}
-                          strokeWidth="2.5"
-                        >
-                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                          <polyline points="22 4 12 14.01 9 11.01" />
-                        </svg>
-                        <span
-                          style={{
-                            background: tc.bg,
-                            color: tc.text,
-                            fontSize: 11,
-                            borderRadius: 6,
-                            padding: "3px 8px",
-                            fontFamily: "'JetBrains Mono', monospace",
-                          }}
-                        >
-                          {doc.tipo}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: 13,
-                            color: "#0f172a",
-                          }}
-                        >
-                          {(doc.chave || "").length > 22
-                            ? doc.chave.slice(0, 22) + "..."
-                            : doc.chave}
-                        </span>
-                      </div>
+                        {doc.tipo}
+                      </span>
+                      <span style={{ fontSize: 13, color: "#0f172a" }}>
+                        {(doc.chave || "").length > 22
+                          ? doc.chave.slice(0, 22) + "..."
+                          : doc.chave}
+                      </span>
                     </div>
                   </td>
-
-                  {/* Documento */}
                   <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                    <span
-                      style={{
-                        fontSize: 16,
-                        color: "#0f172a",
-                      }}
-                    >
+                    <span style={{ fontSize: 16, color: "#0f172a" }}>
                       {doc.numero}
                     </span>
                   </td>
-
-                  {/* Cliente */}
                   <td style={{ padding: "14px 16px" }}>
-                    <span
-                      style={{
-                        fontSize: 13,
-                        color: "#475569",
-                      }}
-                    >
+                    <span style={{ fontSize: 13, color: "#475569" }}>
                       {doc.cliente}
                     </span>
                   </td>
-                  {/* CNPJ */}
                   <td style={{ padding: "14px 16px" }}>
                     <span
                       style={{
@@ -432,7 +383,6 @@ function DocumentTable({
                       {doc.data}
                     </span>
                   </td>
-                  {/* Valor */}
                   <td style={{ padding: "14px 16px" }}>
                     <span
                       style={{
@@ -445,7 +395,6 @@ function DocumentTable({
                       {formatCurrency(doc.valor)}
                     </span>
                   </td>
-                  {/* Status */}
                   <td style={{ padding: "14px 16px" }}>
                     <span
                       style={{
@@ -455,7 +404,6 @@ function DocumentTable({
                         background: sc.bg,
                         color: sc.text,
                         fontSize: 12.5,
-                        fontWeight: 400,
                         borderRadius: 20,
                         padding: "4px 12px",
                       }}
@@ -472,31 +420,13 @@ function DocumentTable({
                       {doc.status}
                     </span>
                   </td>
-                  {/* Ações */}
-                  <td
-                    style={{
-                      padding: "14px 24px 14px 16px",
-                      alignText: "right",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 4,
-                      }}
-                    >
+                  <td style={{ padding: "14px 24px 14px 16px" }}>
+                    <div style={{ display: "flex", gap: 5 }}>
                       <button
                         className="action-btn"
-                        title="Visualizar"
+                        title="Visualizar DANFE"
                         onClick={() => handleVisualizar(doc)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: 7,
-                          borderRadius: 8,
-                          color: "#64748b",
-                        }}
+                        disabled={loadingXml}
                       >
                         <svg
                           width="16"
@@ -514,14 +444,6 @@ function DocumentTable({
                         className="action-btn"
                         title="Baixar XML"
                         onClick={() => handleDownload(doc.id)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: 7,
-                          borderRadius: 8,
-                          color: "#64748b",
-                        }}
                       >
                         <svg
                           width="16"
@@ -536,41 +458,15 @@ function DocumentTable({
                           <line x1="12" y1="15" x2="12" y2="3" />
                         </svg>
                       </button>
-                      <button
-                        className="action-btn"
-                        title="Mais opções"
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: 7,
-                          borderRadius: 8,
-                          color: "#64748b",
-                        }}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <circle cx="12" cy="5" r="1" />
-                          <circle cx="12" cy="12" r="1" />
-                          <circle cx="12" cy="19" r="1" />
-                        </svg>
-                      </button>
                     </div>
                   </td>
                 </tr>
               );
             })}
-
             {documentos.length === 0 && (
               <tr>
                 <td
-                  colSpan={8} // Quantidade de colunas da tabela
+                  colSpan={9}
                   style={{
                     padding: "48px 24px",
                     textAlign: "center",
@@ -632,131 +528,6 @@ function DocumentTable({
           </button>
         </div>
       </div>
-      {docVisualizar && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.45)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 100,
-            backdropFilter: "blur(4px)",
-          }}
-          onClick={() => {
-            setDocVisualizar(null);
-            setXmlContent("");
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              borderRadius: 18,
-              padding: 32,
-              width: 700,
-              maxHeight: "80vh",
-              display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <div>
-                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-                  XML do Documento
-                </h2>
-                <p
-                  style={{
-                    margin: "4px 0 0",
-                    fontSize: 13,
-                    color: "#64748b",
-                  }}
-                >
-                  {docVisualizar.tipo} · Nº {docVisualizar.numero} ·{" "}
-                  {docVisualizar.data}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setDocVisualizar(null);
-                  setXmlContent("");
-                }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 7,
-                  borderRadius: 8,
-                  color: "#64748b",
-                }}
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Conteúdo XML */}
-            <pre
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                background: "#0f172a",
-                color: "#e2e8f0",
-                borderRadius: 10,
-                padding: 16,
-                fontSize: 11,
-                fontFamily: "'JetBrains Mono', monospace",
-                lineHeight: 1.6,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-                margin: 0,
-              }}
-            >
-              {loadingXml ? "Carregando XML..." : xmlContent}
-            </pre>
-
-            {/* Botão fechar */}
-            <button
-              onClick={() => {
-                setDocVisualizar(null);
-                setXmlContent("");
-              }}
-              style={{
-                marginTop: 16,
-                padding: 12,
-                background: "#1d4ed8",
-                border: "none",
-                borderRadius: 10,
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-                color: "white",
-              }}
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
