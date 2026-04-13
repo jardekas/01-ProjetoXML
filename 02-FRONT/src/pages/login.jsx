@@ -38,7 +38,7 @@ export default function Login() {
 
     try {
       const { user, token } = await authService.login(email, password);
-      console.log("user recebido:", user);
+      login(user, token);
       if (rememberMe) {
         localStorage.setItem("remember_email", email);
       } else {
