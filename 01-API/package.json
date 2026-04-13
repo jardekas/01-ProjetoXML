@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.19.2",
+    "@projetoacbr/acbrlib-nfe-node": "^1.0.9",
     "archiver": "^7.0.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
