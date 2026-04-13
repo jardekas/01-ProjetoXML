@@ -12,9 +12,10 @@ export default function UserModal({
   isContadorDelete = false,
   podecriarContador = false,
   podecriarMaster = false,
+  podecriarEmpresa = false,
 }) {
   const tiposDisponiveis = [
-    ...(!podecriarContador ? ["Empresa"] : []),
+    ...(podecriarEmpresa ? ["Empresa"] : []),
     ...(podecriarContador ? ["Contador"] : []),
     ...(podecriarMaster ? ["Master"] : []),
   ];
@@ -164,7 +165,7 @@ export default function UserModal({
                   type: "password",
                 },
                 {
-                  label: "Confirmar Senha",
+                  label: "Confirmar Senha*",
                   key: "confirmarSenha",
                   placeholder: "Repita a senha",
                   mask: null,
@@ -205,6 +206,51 @@ export default function UserModal({
                   gap: 14,
                 }}
               >
+                {/* Checkbox Admin */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: 12.5,
+                      fontWeight: 600,
+                      color: "#64748b",
+                      marginBottom: 7,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    Permissões especiais
+                  </label>
+                  <div
+                    style={{
+                      background: "#f8fafc",
+                      borderRadius: 9,
+                      padding: "12px 14px",
+                      border: "1.5px solid #e2e8f0",
+                    }}
+                  >
+                    <label
+                      className="remember-label-simple"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.flg_admin || false}
+                        onChange={(e) =>
+                          handleFormChange("flg_admin", e.target.checked)
+                        }
+                        className="native-checkbox"
+                      />
+                      <span style={{ color: "#0f172a", fontSize: 14 }}>
+                        Administrador
+                      </span>
+                    </label>
+                  </div>
+                </div>
                 {[
                   {
                     label: "Tipo",
@@ -498,6 +544,7 @@ UserModal.propTypes = {
   editId: PropTypes.number,
   isContadorDelete: PropTypes.bool,
   podecriarContador: PropTypes.bool,
+  podecriarEmpresa: PropTypes.bool,
   podecriarMaster: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,

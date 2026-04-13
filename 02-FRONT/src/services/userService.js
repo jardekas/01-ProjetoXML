@@ -11,6 +11,7 @@ const mapFrontToBack = (userData) => ({
   senha: userData.senha || "senha1234", // Idealmente o usuário define a senha
   flg_conta: userData.tipo === "Contador",
   crc: userData.crc || "",
+  flg_admin: userData.flg_admin || false,
 });
 
 const mapBackToFront = (userData) => ({
@@ -24,6 +25,7 @@ const mapBackToFront = (userData) => ({
   telefone: userData.telefone,
   tipo: userData.flg_conta ? "Contador" : "Empresa",
   status: userData.flg_ativo ? "Ativo" : "Inativo",
+  flg_admin: userData.flg_admin || false,
   criacao: userData.createdAt
     ? new Date(userData.createdAt).toLocaleDateString("pt-BR")
     : new Date().toLocaleDateString("pt-BR"),

@@ -33,9 +33,10 @@ export default function Usuarios() {
   const [hoverRow, setHoverRow] = useState(null);
   const [search, setSearch] = useState("");
   const [isContadorDelete, setIsContadorDelete] = useState(false);
-  const isMaster = user?.flg_master;
-  const isContador = user?.flg_conta;
-  const isAdm = user?.flg_admin;
+  const isMaster = user?.flg_master === true;
+  const isContador = user?.flg_conta === true;
+  const isAdm = user?.flg_admin === true;
+  const isEmpresa = !isMaster && !isContador;
   const podeVerTudo = isAdm || isMaster;
 
   const loadUsers = useCallback(async () => {
@@ -71,7 +72,9 @@ export default function Usuarios() {
   const stats = getStats(users);
 
   const openNew = () => {
-    const tipoDefault = isContador ? "Contador" : "Empresa";
+    let tipoDefault = "Empresa";
+    if (isContador && !isMaster) tipoDefault = "Contador";
+    if (isMaster) tipoDefault = "Empresa";
     setForm({ ...EMPTY_USER, tipo: tipoDefault });
     setEditId(null);
     setModal("new");
@@ -468,6 +471,7 @@ export default function Usuarios() {
         onSave={saveUser}
         onConfirmDelete={confirmDelete}
         isContadorDelete={isContadorDelete}
+        podecriarEmpresa={isMaster || isEmpresa}
         podecriarContador={isMaster || isContador}
         podecriarMaster={isMaster}
       />

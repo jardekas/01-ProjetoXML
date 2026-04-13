@@ -10,6 +10,7 @@ export const EMPTY_USER = {
   crc: "",
   senha: "",
   confirmarSenha: "",
+  flg_admin: false,
 };
 
 // Estilos para status
