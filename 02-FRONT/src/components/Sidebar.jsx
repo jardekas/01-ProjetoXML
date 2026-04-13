@@ -25,7 +25,7 @@ export default function Sidebar() {
       label: "Dashboard",
       path: "/dashboard",
     },
-    {
+    /*{
       icon: (
         <svg
           width="16"
@@ -43,7 +43,7 @@ export default function Sidebar() {
       ),
       label: "Clientes",
       path: "/clientes",
-    },
+    },*/
     {
       icon: (
         <svg
@@ -61,12 +61,12 @@ export default function Sidebar() {
       label: "Documentos",
       path: "/documentos",
     },
-    {
+    /*    {
       icon: (
         <svg
           width="16"
           height="16"
-          viewBox="0 0 24 24"
+          viewBox="0 0 24 24"s
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
@@ -78,7 +78,7 @@ export default function Sidebar() {
       ),
       label: "Relatórios",
       path: "/relatorios",
-    },
+    },*/
     {
       icon: (
         <svg
@@ -96,7 +96,7 @@ export default function Sidebar() {
       label: "Usuários",
       path: "/usuarios",
       adminOnly: true,
-      masterOnly: true,
+      /*{masterOnly: true,}*/
     },
     {
       icon: (
