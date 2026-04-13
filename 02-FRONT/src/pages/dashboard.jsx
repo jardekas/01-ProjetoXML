@@ -8,7 +8,6 @@ import {
   dashboardService,
   PERIODOS,
   TIPOS,
-  CLIENTES,
   LEGEND_ITEMS,
 } from "../services/dashboardService.jsx";
 import "../styles/dashboard.css";
@@ -24,18 +23,19 @@ export default function Dashboard() {
   const [tipo, setTipo] = useState("Todos os tipos");
   const [cliente, setCliente] = useState("");
   const [openSelect, setOpenSelect] = useState(null);
-  const [filtrosAbertos, setFiltrosAbertos] = useState(true);
   const [barData, setBarData] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [kpiData, setKpiData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clientes, setClientes] = useState([]);
+  const [periodo, setPeriodo] = useState("");
 
   const handleClearFilters = () => {
     setDataInicio(primeiroDiaMes.toISOString().slice(0, 10));
     setDataFim(hoje.toISOString().slice(0, 10));
     setTipo("Todos os tipos");
     setCliente("");
+    setPeriodo("");
   };
 
   const loadDados = useCallback(() => {
@@ -73,6 +73,13 @@ export default function Dashboard() {
         {/* Header igual */}
 
         <FilterBar
+          dataInicio={dataInicio}
+          setDataInicio={setDataInicio}
+          dataFim={dataFim}
+          setDataFim={setDataFim}
+          periodo={periodo} // ← adicione
+          setPeriodo={setPeriodo} // ← adicione
+          periodos={PERIODOS}
           tipo={tipo}
           setTipo={setTipo}
           cliente={cliente}

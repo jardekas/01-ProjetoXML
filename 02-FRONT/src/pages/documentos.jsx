@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import api from "../services/api";
 import StatsCard from "../components/StatsCard";
@@ -6,6 +6,7 @@ import FilterBar from "../components/FilterBar";
 import DocumentTable from "../components/DocumentTable";
 import ImportModal from "../components/ImportModal";
 import ImpressModal from "../components/ImpressModal";
+import PeriodoPickerModal from "../components/PeriodoPickerModal";
 import "../styles/documentos.css";
 
 export default function Documentos() {
@@ -28,12 +29,41 @@ export default function Documentos() {
   const [selected, setSelected] = useState([]);
   const [importModal, setImportModal] = useState(false);
   const [impressModal, setImpressModal] = useState(false);
+  const [openSelect, setOpenSelect] = useState(null);
+
+  const [periodoModalOpen, setPeriodoModalOpen] = useState(false);
+  const [periodoFiltro, setPeriodoFiltro] = useState(null); // { mes, ano }
+
+  const userType = user?.flg_conta || user?.flg_master ? "contador" : "empresa";
+
+  // Período baseado nos documentos filtrados (para o relatório)
+  const periodoInicio = useMemo(() => {
+    if (!documentos.length) return "—";
+    const datas = documentos
+      .map((d) => d.data)
+      .filter(Boolean)
+      .sort();
+    return datas[0] || "—";
+  }, [documentos]);
+
+  const periodoFim = useMemo(() => {
+    if (!documentos.length) return "—";
+    const datas = documentos
+      .map((d) => d.data)
+      .filter(Boolean)
+      .sort();
+    return datas[datas.length - 1] || "—";
+  }, [documentos]);
+
+  const clientesList = useMemo(() => {
+    const nomesUnicos = [...new Set(allDocs.map((doc) => doc.cliente))].filter(
+      Boolean,
+    );
+    return nomesUnicos.map((nome) => ({ value: nome, label: nome }));
+  }, [allDocs]);
 
   const loadDocumentos = useCallback(() => {
     if (!user?.EMPcpfCNPJ) return;
-    console.log("user:", user); // 👈 verificar flg_conta e idContador
-    console.log("flg_conta:", user.flg_conta);
-    console.log("idContador:", user.idContador);
 
     setLoading(true);
     setErro("");
@@ -71,10 +101,10 @@ export default function Documentos() {
         ? doc.nomeEmp || "EMISSOR"
         : doc.nomeCli || "CONSUMIDOR FINAL",
       clienteCNPJ: Contador
-        ? doc.EMPcpfCNPJ || "—" // CNPJ da empresa emissora
+        ? doc.EMPcpfCNPJ || "—"
         : doc.CNPJCli === "00000000000"
           ? "—"
-          : doc.CNPJCli || "—", // CNPJ do destinatário
+          : doc.CNPJCli || "—",
       data: doc.data ? new Date(doc.data).toLocaleDateString("pt-BR") : "",
       valor: parseFloat(doc.valor) || 0,
       status: mapStatus(doc.status),
@@ -104,7 +134,7 @@ export default function Documentos() {
     loadDocumentos();
   }, [loadDocumentos]);
 
-  // Filtros locais
+  // Filtros locais (incluindo período)
   useEffect(() => {
     const filtrados = allDocs.filter((doc) => {
       if (busca && !doc.chave?.includes(busca)) return false;
@@ -116,18 +146,44 @@ export default function Documentos() {
         return false;
       if (tipoFiltro !== "Todos" && doc.tipo !== tipoFiltro) return false;
       if (statusFiltro !== "Todos" && doc.status !== statusFiltro) return false;
+
+      // Filtro de período
+      if (periodoFiltro) {
+        const [dia, mes, ano] = doc.data.split("/");
+        if (!dia || !mes || !ano) return false;
+        const docMes = parseInt(mes, 10) - 1; // 0-11
+        const docAno = parseInt(ano, 10);
+        if (docMes !== periodoFiltro.mes || docAno !== periodoFiltro.ano)
+          return false;
+      }
+
       return true;
     });
     setDocumentos(filtrados);
-  }, [busca, numDoc, clienteFiltro, tipoFiltro, statusFiltro, allDocs]);
+  }, [
+    busca,
+    numDoc,
+    clienteFiltro,
+    tipoFiltro,
+    statusFiltro,
+    allDocs,
+    periodoFiltro,
+  ]);
 
-  // Stats
+  // Stats (baseadas em allDocs, não nos filtrados)
   const total = allDocs.length;
   const autorizadas = allDocs.filter((d) => d.status === "Autorizada").length;
   const problemas = allDocs.filter((d) => d.status === "Com Problema").length;
 
-  // Período
-  const periodo = (() => {
+  // Período exibido no card (filtrado ou mais recente)
+  const periodoExibicao = useMemo(() => {
+    if (periodoFiltro) {
+      const data = new Date(periodoFiltro.ano, periodoFiltro.mes);
+      return data
+        .toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })
+        .replace(". de ", "/")
+        .replace(".", "");
+    }
     if (!allDocs.length) return "—";
     const datas = allDocs
       .map((d) => {
@@ -141,7 +197,7 @@ export default function Documentos() {
       .toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })
       .replace(". de ", "/")
       .replace(".", "");
-  })();
+  }, [allDocs, periodoFiltro]);
 
   const toggleSelect = (id) =>
     setSelected((s) =>
@@ -343,8 +399,10 @@ export default function Documentos() {
               </svg>
             }
             bgColor="#ecfeff"
-            value={periodo}
-            label="Período"
+            value={periodoExibicao}
+            label={periodoFiltro ? "Período (filtrado)" : "Período"}
+            clickable
+            onClick={() => setPeriodoModalOpen(true)}
           />
         </div>
 
@@ -361,10 +419,13 @@ export default function Documentos() {
               setNumDoc={setNumDoc}
               clienteFiltro={clienteFiltro}
               setClienteFiltro={setClienteFiltro}
+              clientesList={clientesList}
               tipoFiltro={tipoFiltro}
               setTipoFiltro={setTipoFiltro}
               statusFiltro={statusFiltro}
               setStatusFiltro={setStatusFiltro}
+              openSelect={openSelect}
+              setOpenSelect={setOpenSelect}
             />
             <DocumentTable
               documentos={sorted}
@@ -387,6 +448,15 @@ export default function Documentos() {
       <ImpressModal
         isOpen={impressModal}
         onClose={() => setImpressModal(false)}
+        documentos={documentos}
+        userType={userType}
+        periodoInicio={periodoInicio}
+        periodoFim={periodoFim}
+      />
+      <PeriodoPickerModal
+        isOpen={periodoModalOpen}
+        onClose={() => setPeriodoModalOpen(false)}
+        onConfirm={({ mes, ano }) => setPeriodoFiltro({ mes, ano })}
       />
     </div>
   );
