@@ -11,13 +11,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@alexssmusica/node-pdf-nfe": "^1.2.19",
     "@prisma/client": "^6.19.2",
     "@projetoacbr/acbrlib-nfe-node": "^1.0.9",
     "archiver": "^7.0.1",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
+    "node-jre": "^0.2.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "xml2js": "^0.6.2"

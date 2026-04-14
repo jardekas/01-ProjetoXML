@@ -37,13 +37,26 @@ export const downloadXMLsService = async (idUser, EMPcpfCNPJ, ids, res) => {
     );
   }
 
-  if (!user.flg_master) {
-    // valida hash do documento
-    const hashUser = user.hashCNPJ;
-    for (const doc of docs) {
-      if (doc.hashDoc !== hashUser) {
-        throw new Error("Configuração de cadastro inválido.");
-      }
+  if (user.flg_master) {
+    // Master: acesso total, sem validação adicional
+  } else if (user.flg_conta) {
+    // Contador: verifica vínculo e hash
+    const vinculo = await prisma.contador_empresa.findUnique({
+      where: {
+        contadorId_cnpj: {
+          contadorId: user.idContador,
+          cnpj: EMPcpfCNPJ,
+        },
+      },
+    });
+    if (!vinculo) throw new Error("CNPJ não vinculado ao contador.");
+    if (docs[0].hashDoc !== vinculo.hashCNPJ) {
+      throw new Error("Permissão do Usuário não Permite baixar o Documento.");
+    }
+  } else {
+    // Empresa comum: valida pelo hash do usuário
+    if (user.hashCNPJ !== docs[0].hashDoc) {
+      throw new Error("Configuração de cadastro inválido.");
     }
   }
 

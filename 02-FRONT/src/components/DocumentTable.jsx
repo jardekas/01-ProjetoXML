@@ -54,9 +54,26 @@ function DocumentTable({
     setLoadingXml(true);
     try {
       const response = await api.get(`/document/visualizar/${doc.id}`);
-      await abrirDanfe(response.data.xml);
+      const xml = response.data.xml;
+
+      // Chama o backend para gerar o PDF
+      const pdfResponse = await api.post(
+        "/api/danfe/gerar",
+        { xml },
+        {
+          responseType: "blob",
+        },
+      );
+
+      const url = window.URL.createObjectURL(
+        new Blob([pdfResponse.data], { type: "application/pdf" }),
+      );
+      window.open(url, "_blank");
     } catch (error) {
-      alert("Erro ao carregar XML: " + error.message);
+      alert(
+        "Erro ao gerar DANFE: " +
+          (error.response?.data?.error || error.message),
+      );
     } finally {
       setLoadingXml(false);
     }
@@ -66,9 +83,24 @@ function DocumentTable({
     if (!selected.length) return;
     try {
       const ids = selected.join(",");
+      const primeiroDoc = documentos.find((doc) => doc.id === selected[0]);
+      const docCnpj = primeiroDoc?.EMPcpfCNPJ;
+      const cnpjParaDownload = user.flg_conta ? docCnpj : user.EMPcpfCNPJ;
+      const token = localStorage.getItem("token");
+
+      if (!cnpjParaDownload) {
+        alert("CNPJ para download não disponível.");
+        return;
+      }
+
       const response = await api.get(
-        `/document/${user.id}/${user.EMPcpfCNPJ}/download?id=${ids}`,
-        { responseType: "blob" },
+        `/document/${cnpjParaDownload}/download?id=${ids}`,
+        {
+          responseType: "blob",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -85,11 +117,18 @@ function DocumentTable({
     }
   };
 
-  const handleDownload = async (docId) => {
+  const handleDownload = async (docId, docCnpj) => {
     try {
+      const token = localStorage.getItem("token");
+      const cnpjParaDownload = user.flg_conta ? docCnpj : user.EMPcpfCNPJ;
       const response = await api.get(
-        `/document/${user.id}/${user.EMPcpfCNPJ}/download?id=${docId}`,
-        { responseType: "blob" },
+        `/document/${cnpjParaDownload}/download?id=${docId}`,
+        {
+          responseType: "blob",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -443,7 +482,7 @@ function DocumentTable({
                       <button
                         className="action-btn"
                         title="Baixar XML"
-                        onClick={() => handleDownload(doc.id)}
+                        onClick={() => handleDownload(doc.id, doc.EMPcpfCNPJ)}
                       >
                         <svg
                           width="16"

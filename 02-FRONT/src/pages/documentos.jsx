@@ -95,6 +95,7 @@ export default function Documentos() {
 
     const mapDoc = (doc) => ({
       id: doc.id,
+      EMPcpfCNPJ: doc.EMPcpfCNPJ,
       chave: doc.chave44 || extrairChave(doc.caminho),
       numero: String(doc.nroDoc) || "",
       cliente: Contador

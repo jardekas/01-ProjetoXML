@@ -5,6 +5,9 @@
     "tailwindcss": "^3.4.10"
   },
   "dependencies": {
+    "@alexssmusica/node-pdf-nfe": "^1.2.19",
+    "@projetoacbr/acbrlib-nfe-node": "^1.0.9",
+    "dotenv": "^17.4.2",
     "prop-types": "^15.8.1"
   }
 }

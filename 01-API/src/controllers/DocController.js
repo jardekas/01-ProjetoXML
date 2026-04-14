@@ -41,10 +41,11 @@ export const visualizarDoc = async (req, res) => {
 //Download XMLs
 export const downloadXMLs = async (req, res) => {
   try {
-    const { idUser, EMPcpfCNPJ } = req.params;
+    const { EMPcpfCNPJ } = req.params;
     const { id } = req.query;
+    const idUser = req.user.id;
     if (!idUser) {
-      return res.status(400).json({ error: "Usuário Inválido" });
+      return res.status(401).json({ error: "Usuário não autenticado" });
     }
     if (!EMPcpfCNPJ) {
       return res.status(400).json({ error: "Empresa Inválida" });
@@ -56,7 +57,7 @@ export const downloadXMLs = async (req, res) => {
       .split(",")
       .map((v) => Number(v))
       .filter((v) => !isNaN(v));
-    await downloadXMLsService(Number(idUser), EMPcpfCNPJ, ids, res);
+    await downloadXMLsService(idUser, EMPcpfCNPJ, ids, res);
   } catch (error) {
     console.error("Erro detalhado:", error);
     res.status(500).json({ error: error.message });
