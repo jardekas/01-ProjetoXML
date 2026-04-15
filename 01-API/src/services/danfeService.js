@@ -43,7 +43,7 @@ export async function gerarDanfePDF(xmlString, opcoes = {}) {
     }
 
     // 6. Remove a seção infAdic para evitar qualquer tentativa de renderização
-    delete infNFe.infAdic;
+    //delete infNFe.infAdic;
 
     // 7. Converte o objeto de volta para string XML
     const builder = new xml2js.Builder({

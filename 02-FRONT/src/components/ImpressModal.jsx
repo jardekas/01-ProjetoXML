@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { gerarHTMLRelatorio } from "../utils/relatorioUtils";
 
@@ -11,31 +11,59 @@ export default function ImpressModal({
   periodoFim,
 }) {
   const [gerando, setGerando] = useState(false);
+  const [iframeReady, setIframeReady] = useState(false);
+  const iframeRef = useRef(null);
+
+  const html = gerarHTMLRelatorio(
+    documentos,
+    periodoInicio,
+    periodoFim,
+    userType,
+  );
+
+  // Reinicia o estado quando o modal abre
+  useEffect(() => {
+    if (isOpen) {
+      setIframeReady(false);
+    }
+  }, [isOpen]);
+
+  // Injeta HTML no iframe assim que ele estiver disponível
+  useEffect(() => {
+    if (isOpen && iframeRef.current) {
+      const iframe = iframeRef.current;
+      const handleLoad = () => setIframeReady(true);
+
+      iframe.addEventListener("load", handleLoad);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(html);
+      iframeDoc.close();
+
+      // Se já estiver carregado, marca como pronto
+      if (iframeDoc.readyState === "complete") {
+        setIframeReady(true);
+      }
+
+      return () => iframe.removeEventListener("load", handleLoad);
+    }
+  }, [isOpen, html]);
 
   const handleGerarPDF = async () => {
-    if (!documentos || documentos.length === 0) {
-      alert("Nenhum documento para gerar relatório.");
-      onClose();
+    if (!iframeRef.current || !iframeReady) {
+      alert("Aguarde o carregamento da pré-visualização.");
       return;
     }
 
     setGerando(true);
 
-    const html = gerarHTMLRelatorio(
-      documentos,
-      periodoInicio,
-      periodoFim,
-      userType,
-    );
+    const iframe = iframeRef.current;
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-    // Container temporário fora da tela
-    const container = document.createElement("div");
-    container.innerHTML = html;
-    container.style.cssText =
-      "position:absolute;left:-9999px;top:0;width:794px;";
-    document.body.appendChild(container);
+    // Aguarda um ciclo para garantir renderização completa
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Carregar html2pdf dinamicamente
     const script = document.createElement("script");
     script.src =
       "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
@@ -45,28 +73,36 @@ export default function ImpressModal({
       const nomeArquivo =
         `relatorio_${periodoInicio}_${periodoFim}.pdf`.replace(/\//g, "-");
 
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: nomeArquivo,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        pagebreak: { mode: ["css", "legacy"] },
+      };
+
       window
         .html2pdf()
-        .set({
-          margin: [10, 10, 10, 10],
-          filename: nomeArquivo,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-        })
-        .from(container)
+        .set(opt)
+        .from(iframeDoc.body)
         .save()
         .then(() => {
-          document.body.removeChild(container);
           document.head.removeChild(script);
           setGerando(false);
           onClose();
+        })
+        .catch((err) => {
+          console.error("Erro ao gerar PDF:", err);
+          alert("Erro ao gerar PDF.");
+          document.head.removeChild(script);
+          setGerando(false);
         });
     };
 
     script.onerror = () => {
       alert("Erro ao carregar biblioteca de PDF.");
-      document.body.removeChild(container);
+      document.head.removeChild(script);
       setGerando(false);
     };
   };
@@ -91,64 +127,56 @@ export default function ImpressModal({
         style={{
           background: "white",
           borderRadius: 16,
-          padding: 28,
-          width: 400,
-          maxWidth: "90%",
+          padding: 24,
+          width: "90%",
+          maxWidth: 1000,
+          maxHeight: "90vh",
+          display: "flex",
+          flexDirection: "column",
           boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
           animation: "modalIn 0.2s ease",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: "50%",
-              background: "#eef2ff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-            }}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#1d4ed8"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="12" y1="18" x2="12" y2="12" />
-              <line x1="9" y1="15" x2="15" y2="15" />
-            </svg>
-          </div>
+        <div style={{ marginBottom: 16, textAlign: "center" }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
             Gerar Relatório PDF
           </h2>
-          <p
-            style={{
-              margin: "8px 0 0",
-              fontSize: 14,
-              color: "#64748b",
-              lineHeight: 1.5,
-            }}
-          >
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
             {documentos.length} documento{documentos.length !== 1 ? "s" : ""} ·{" "}
             {periodoInicio} até {periodoFim}
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 10 }}>
+        <div
+          style={{
+            flex: 1,
+            overflow: "auto",
+            border: "1px solid #e2e8f0",
+            borderRadius: 8,
+            backgroundColor: "#f8fafc",
+            marginBottom: 16,
+          }}
+        >
+          <iframe
+            ref={iframeRef}
+            title="preview"
+            style={{
+              width: "100%",
+              height: "100%",
+              minHeight: 350,
+              border: "none",
+              backgroundColor: "white",
+            }}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button
             onClick={onClose}
             disabled={gerando}
             style={{
-              flex: 1,
-              padding: "12px",
+              padding: "10px 20px",
               background: "white",
               border: "1.5px solid #e2e8f0",
               borderRadius: 10,
@@ -162,18 +190,18 @@ export default function ImpressModal({
           </button>
           <button
             onClick={handleGerarPDF}
-            disabled={gerando}
+            disabled={gerando || !iframeReady}
             style={{
-              flex: 1,
-              padding: "12px",
-              background: gerando
-                ? "#93c5fd"
-                : "linear-gradient(135deg,#1d4ed8,#3b82f6)",
+              padding: "10px 20px",
+              background:
+                gerando || !iframeReady
+                  ? "#93c5fd"
+                  : "linear-gradient(135deg,#1d4ed8,#3b82f6)",
               border: "none",
               borderRadius: 10,
               fontSize: 14,
               fontWeight: 600,
-              cursor: gerando ? "not-allowed" : "pointer",
+              cursor: gerando || !iframeReady ? "not-allowed" : "pointer",
               color: "white",
             }}
           >

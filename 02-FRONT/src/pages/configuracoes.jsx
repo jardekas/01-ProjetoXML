@@ -1,91 +1,97 @@
 import { useAuth } from "../hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import ToggleSwitch from "../components/ToggleSwitch";
 import TemaSelector from "../components/TemaSelector";
 import UploadArea from "../components/UploadArea";
 import InputField from "../components/InputField";
 import Toast from "../components/Toast";
-import api from "../services/api";
-import { maskCNPJ } from "../utils/mask";
+import { maskCNPJ, maskCPF } from "../utils/mask";
 import {
   TEMAS,
   DADOS_INICIAIS,
   configService,
 } from "../services/configuracoesService";
+import { ThemeContext } from "../contexts/ThemeContext";
 import "../styles/configuracoes.css";
 
 export default function Configuracoes() {
   const { user } = useAuth();
+  const { tema, setTema, modoEscuro, setModoEscuro } = useContext(ThemeContext);
   const Contador = user?.flg_conta === true;
 
-  const [cnpjsVinculados, setCnpjsVinculados] = useState([]);
-  const [novoCnpj, setNovoCnpj] = useState("");
-  const [modoEscuro, setModoEscuro] = useState(false);
-  const [temaAtivo, setTemaAtivo] = useState("azul");
+  // Estados locais para UI (refletem o contexto)
+  const [temaAtivo, setTemaAtivo] = useState(tema);
+  const [modoEscuroLocal, setModoEscuroLocal] = useState(modoEscuro);
   const [logoFile, setLogoFile] = useState(null);
-  const [saved, setSaved] = useState(false);
   const [hoverTema, setHoverTema] = useState(null);
+
+  // Dados do usuário (nome, email, senha, etc.)
   const [dados, setDados] = useState(DADOS_INICIAIS);
   const [focusedField, setFocusedField] = useState(null);
   const [erro, setErro] = useState("");
+  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Sincroniza estados locais com o contexto quando ele mudar (ex: ao carregar do localStorage)
   useEffect(() => {
-    if (user?.idContador && Contador) {
-      api
-        .get(`/contador/${user.idContador}/vinculos`)
-        .then((res) => setCnpjsVinculados(res.data.map((v) => v.cnpj)))
-        .catch(console.error);
-    }
-  }, [user, Contador]);
+    setTemaAtivo(tema);
+    setModoEscuroLocal(modoEscuro);
+  }, [tema, modoEscuro]);
 
-  const adicionarCnpj = async () => {
-    const cnpjLimpo = novoCnpj.replace(/\D/g, "");
-    if (cnpjLimpo.length !== 14) {
-      setErro("CNPJ inválido");
-      return;
-    }
-    try {
-      await api.post(`/contador/${user.idContador}/vinculos`, {
-        cnpj: cnpjLimpo,
-      });
-      setCnpjsVinculados((prev) => [...prev, cnpjLimpo]);
-      setNovoCnpj("");
-      setErro("");
-    } catch (err) {
-      setErro(err.response?.data?.error || "Erro ao adicionar CNPJ");
-    }
-  };
-
-  const removerCnpj = async (cnpj) => {
-    try {
-      await api.delete(`/contador/${user.idContador}/vinculos/${cnpj}`);
-      setCnpjsVinculados((prev) => prev.filter((c) => c !== cnpj));
-    } catch (err) {
-      setErro("Erro ao remover CNPJ");
-    }
-  };
-
+  // Carrega apenas os dados do usuário (nome, email, etc.)
   useEffect(() => {
-    if (user?.id) {
-      configService
-        .getDados(user)
-        .then(setDados)
-        .catch(() => setErro("Erro ao carregar dados do usuário"))
-        .finally(() => setLoading(false));
-    }
+    if (!user?.id) return;
+
+    const loadUserData = async () => {
+      try {
+        const dadosUsuario = await configService.getDados(user);
+        setDados(dadosUsuario);
+      } catch (error) {
+        setErro("Erro ao carregar dados do usuário");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
   }, [user]);
 
   const handleSave = async () => {
     setErro("");
     try {
+      // 1. Atualiza o contexto global (já salva no localStorage automaticamente)
+      setTema(temaAtivo);
+      setModoEscuro(modoEscuroLocal);
+
+      // 2. Upload da logo (se houver arquivo selecionado)
+      if (logoFile && logoFile instanceof File) {
+        // Implemente o endpoint de upload de logo para contador, se necessário
+        // await configService.uploadLogo(logoFile, user.idContador);
+        console.warn("Upload de logo ainda não implementado no backend.");
+      }
+
+      // 3. Salvar dados do usuário (nome, email, senha, etc.)
       await configService.salvarDados(user, dados);
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
-      setErro(error.message || "Erro ao salvar dados");
+      setErro(error.message || "Erro ao salvar configurações");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="configuracoes-container">
+        <main style={{ padding: "32px 36px" }}>
+          <div style={{ textAlign: "center", color: "var(--text-muted)" }}>
+            Carregando configurações...
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="configuracoes-container">
@@ -113,7 +119,7 @@ export default function Configuracoes() {
               width: 44,
               height: 44,
               borderRadius: 12,
-              background: "#eff6ff",
+              background: "var(--accent-light)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -124,7 +130,7 @@ export default function Configuracoes() {
               height="22"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#1d4ed8"
+              stroke="var(--accent-color)"
               strokeWidth="2"
             >
               <circle cx="12" cy="12" r="3" />
@@ -138,11 +144,18 @@ export default function Configuracoes() {
                 fontSize: 28,
                 fontWeight: 700,
                 letterSpacing: "-0.03em",
+                color: "var(--text-primary)",
               }}
             >
               Configurações
             </h1>
-            <p style={{ margin: "3px 0 0", fontSize: 13.5, color: "#64748b" }}>
+            <p
+              style={{
+                margin: "3px 0 0",
+                fontSize: 13.5,
+                color: "var(--text-secondary)",
+              }}
+            >
               Personalize e gerencie seu escritório
             </p>
           </div>
@@ -194,12 +207,12 @@ export default function Configuracoes() {
             <p className="section-sub">Personalize a aparência do sistema</p>
 
             <ToggleSwitch
-              checked={modoEscuro}
+              checked={modoEscuroLocal}
               onChange={setModoEscuro}
               label="Modo Escuro"
               description="Alterna entre tema claro e escuro"
               icon={
-                modoEscuro ? (
+                modoEscuroLocal ? (
                   <svg
                     width="17"
                     height="17"
@@ -236,7 +249,7 @@ export default function Configuracoes() {
             <TemaSelector
               temas={TEMAS}
               temaAtivo={temaAtivo}
-              onSelect={setTemaAtivo}
+              onSelect={setTema}
               hoverTema={hoverTema}
               setHoverTema={setHoverTema}
             />
@@ -261,7 +274,7 @@ export default function Configuracoes() {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: "#eff6ff",
+                  background: "var(--accent-light)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -273,7 +286,7 @@ export default function Configuracoes() {
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#1d4ed8"
+                  stroke="var(--accent-color)"
                   strokeWidth="2"
                 >
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -309,7 +322,7 @@ export default function Configuracoes() {
                   label="CNPJ"
                   value={dados.cnpj}
                   onChange={(e) =>
-                    setDados((d) => ({ ...d, cnpj: e.target.value }))
+                    setDados((d) => ({ ...d, cnpj: maskCNPJ(e.target.value) }))
                   }
                   onFocus={() => setFocusedField("cnpj")}
                   onBlur={() => setFocusedField(null)}
@@ -321,7 +334,7 @@ export default function Configuracoes() {
                   label="CPF"
                   value={dados.cpf}
                   onChange={(e) =>
-                    setDados((d) => ({ ...d, cpf: e.target.value }))
+                    setDados((d) => ({ ...d, cpf: maskCPF(e.target.value) }))
                   }
                   onFocus={() => setFocusedField("cpf")}
                   onBlur={() => setFocusedField(null)}
@@ -347,94 +360,6 @@ export default function Configuracoes() {
                 />
               )}
 
-              {/* Empresas Vinculadas — só para contadores */}
-              {Contador && (
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12.5,
-                      fontWeight: 600,
-                      color: "#64748b",
-                      marginBottom: 7,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    Empresas Vinculadas
-                  </label>
-                  <p
-                    style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8 }}
-                  >
-                    Documentos dessas empresas aparecerão no seu painel
-                  </p>
-
-                  {cnpjsVinculados.map((cnpj) => (
-                    <div
-                      key={cnpj}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "8px 12px",
-                        background: "#f8fafc",
-                        borderRadius: 8,
-                        marginBottom: 6,
-                        border: "1px solid #e2e8f0",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: 13,
-                        }}
-                      >
-                        {maskCNPJ(cnpj)}
-                      </span>
-                      <button
-                        onClick={() => removerCnpj(cnpj)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#dc2626",
-                          padding: 4,
-                        }}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-
-                  <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                    <input
-                      className="input-f"
-                      placeholder="00.000.000/0000-00"
-                      value={novoCnpj}
-                      onChange={(e) => setNovoCnpj(maskCNPJ(e.target.value))}
-                      style={{ flex: 1 }}
-                    />
-                    <button
-                      className="btn-primary"
-                      onClick={adicionarCnpj}
-                      style={{ padding: "8px 16px", whiteSpace: "nowrap" }}
-                    >
-                      + Adicionar
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {/* E-mail */}
               <InputField
                 label="E-mail"
@@ -452,7 +377,11 @@ export default function Configuracoes() {
                     height="15"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke={focusedField === "email" ? "#1d4ed8" : "#94a3b8"}
+                    stroke={
+                      focusedField === "email"
+                        ? "var(--accent-color)"
+                        : "var(--text-muted)"
+                    }
                     strokeWidth="2"
                   >
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -479,7 +408,11 @@ export default function Configuracoes() {
                     height="15"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke={focusedField === "senha" ? "#1d4ed8" : "#94a3b8"}
+                    stroke={
+                      focusedField === "senha"
+                        ? "var(--accent-color)"
+                        : "var(--text-muted)"
+                    }
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -509,7 +442,9 @@ export default function Configuracoes() {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke={
-                      focusedField === "confirmarSenha" ? "#1d4ed8" : "#94a3b8"
+                      focusedField === "confirmarSenha"
+                        ? "var(--accent-color)"
+                        : "var(--text-muted)"
                     }
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -537,7 +472,6 @@ export default function Configuracoes() {
 
               <div className="divider" style={{ margin: "4px 0" }} />
 
-              {/* Save button */}
               <button
                 className={`save-btn${saved ? " saved" : ""}`}
                 onClick={handleSave}

@@ -1,3 +1,5 @@
+// utils/relatorioUtils.js
+
 export const formatarData = (dataStr) => {
   if (!dataStr) return "";
   const [dia, mes, ano] = dataStr.split("/");
@@ -65,7 +67,7 @@ export const gerarHTMLRelatorio = (
       <title>Relatório Fiscal</title>
       <style>
         body {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Courier New', monospace;
           margin: 30px;
           color: #000;
         }
@@ -91,16 +93,26 @@ export const gerarHTMLRelatorio = (
           width: 100%;
           border-collapse: collapse;
           font-size: 12px;
+          table-layout: fixed;
+          word-wrap: break-word;
         }
         th, td {
           border: 1px solid #000;
           padding: 5px 8px;
           text-align: left;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         th {
           background-color: #f0f0f0;
           font-weight: bold;
         }
+          th:nth-child(1) { width: 6%; }   
+          th:nth-child(2) { width: 10%; }  
+          th:nth-child(3) { width: 10%; }  
+          th:nth-child(4) { width: 12%; }  
+          th:nth-child(5) { width: 42%; }  
+          th:nth-child(6) { width: 20%; }  
         .total-row {
           font-weight: bold;
           background-color: #e0e0e0;
@@ -110,7 +122,11 @@ export const gerarHTMLRelatorio = (
           font-size: 12px;
         }
         @media print {
-          body { margin: 15px; }
+          body { margin: 10mm; }
+          table { page-break-inside: auto; }
+          tr { page-break-inside: avoid; page-break-after: auto; }
+          thead { display: table-header-group; }  
+          tfoot { display: table-footer-group; }
         }
       </style>
     </head>

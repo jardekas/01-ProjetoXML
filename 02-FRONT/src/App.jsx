@@ -3,62 +3,65 @@ import { ROUTES } from "./routes/routes";
 import Layout from "./components/Layout";
 import Login from "./pages/login";
 import { AuthProvider } from "./contexts/AuthProvider";
+import { ThemeProvider } from "./contexts/ThemeProvider";
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          {/* Rota de login sem sidebar */}
-          <Route path="/login" element={<Login />} />
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* Rota de login sem sidebar */}
+            <Route path="/login" element={<Login />} />
 
-          {/* Rotas protegidas com sidebar */}
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Layout />
-              </PrivateRoute>
-            }
-          >
+            {/* Rotas protegidas com sidebar */}
             <Route
-              path={ROUTES.DASHBOARD.path}
-              element={<ROUTES.DASHBOARD.component />}
-            />
-            <Route
-              path={ROUTES.DOCUMENTOS.path}
-              element={<ROUTES.DOCUMENTOS.component />}
-            />
-            <Route
-              path={ROUTES.USUARIOS.path}
+              path="/"
               element={
-                <PrivateRoute adminOnly>
-                  <ROUTES.USUARIOS.component />
+                <PrivateRoute>
+                  <Layout />
                 </PrivateRoute>
               }
+            >
+              <Route
+                path={ROUTES.DASHBOARD.path}
+                element={<ROUTES.DASHBOARD.component />}
+              />
+              <Route
+                path={ROUTES.DOCUMENTOS.path}
+                element={<ROUTES.DOCUMENTOS.component />}
+              />
+              <Route
+                path={ROUTES.USUARIOS.path}
+                element={
+                  <PrivateRoute adminOnly>
+                    <ROUTES.USUARIOS.component />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path={ROUTES.CONFIGURACOES.path}
+                element={<ROUTES.CONFIGURACOES.component />}
+              />
+            </Route>
+
+            {/* Rota de redefinir senha (pública) */}
+            <Route
+              path={ROUTES.REDEFINIRSENHA.path}
+              element={<ROUTES.REDEFINIRSENHA.component />}
             />
             <Route
-              path={ROUTES.CONFIGURACOES.path}
-              element={<ROUTES.CONFIGURACOES.component />}
+              path={ROUTES.CADASTRO.path}
+              element={<ROUTES.CADASTRO.component />}
             />
-          </Route>
 
-          {/* Rota de redefinir senha (pública) */}
-          <Route
-            path={ROUTES.REDEFINIRSENHA.path}
-            element={<ROUTES.REDEFINIRSENHA.component />}
-          />
-          <Route
-            path={ROUTES.CADASTRO.path}
-            element={<ROUTES.CADASTRO.component />}
-          />
-
-          {/* Rota 404 */}
-          <Route path="*" element={<div>Página em Construção</div>} />
-        </Routes>
-      </BrowserRouter>
+            {/* Rota 404 */}
+            <Route path="*" element={<div>Página em Construção</div>} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

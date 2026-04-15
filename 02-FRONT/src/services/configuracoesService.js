@@ -17,6 +17,26 @@ export const DADOS_INICIAIS = {
 };
 
 export const configService = {
+  //Config_Temas
+  async getConfig(userId) {
+    const res = await api.get(`/usuario/${userId}/config`);
+    return res.data; // { tema, modoEscuro, logo }
+  },
+
+  async saveConfig(userId, config) {
+    return api.put(`/usuario/${userId}/config`, config);
+  },
+
+  async uploadLogo(file) {
+    const formData = new FormData();
+    formData.append("logo", file);
+    const res = await api.post("/usuario/logo", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data.path; // caminho relativo da logo salva
+  },
+
+  //Dados usuário
   async getDados(user) {
     const base = {
       nome: user.name || "",

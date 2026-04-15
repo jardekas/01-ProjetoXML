@@ -1,16 +1,15 @@
 .dashboard-container {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-page);
   font-family: "Outfit", "Segoe UI", sans-serif;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
-/* Stat Card */
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 14px;
   padding: 22px 24px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   transition: all 0.2s;
 }
@@ -20,43 +19,40 @@
   transform: translateY(-2px);
 }
 
-/* Action Button */
 .action-btn {
   background: none;
   border: none;
   cursor: pointer;
   padding: 7px;
   border-radius: 8px;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.18s;
   display: flex;
   align-items: center;
 }
 
 .action-btn:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--accent-light);
+  color: var(--accent-color);
 }
 
-/* Chart Card */
 .chart-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   padding: 26px 28px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
-/* Buttons */
 .btn-outline {
-  background: white;
-  border: 1.5px solid #e2e8f0;
+  background: var(--btn-secondary-bg);
+  border: 1.5px solid var(--border-light);
   border-radius: 10px;
   padding: 10px 18px;
   font-size: 14px;
   font-weight: 500;
   font-family: inherit;
-  color: #374151;
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -65,7 +61,11 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  background: linear-gradient(
+    135deg,
+    var(--btn-primary-bg),
+    var(--accent-color)
+  );
   border: none;
   border-radius: 10px;
   padding: 10px 18px;

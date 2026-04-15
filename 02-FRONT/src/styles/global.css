@@ -8,11 +8,96 @@
 
 body {
   font-family: "Outfit", "Segoe UI", sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
-/*animações globais */
+/* ===== VARIÁVEIS CSS (TEMA CLARO PADRÃO) ===== */
+:root {
+  /* Cores base - Tema Claro */
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-light: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Sidebar */
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #f8fafc;
+  --sidebar-hover: #334155;
+
+  /* Botões */
+  --btn-primary-bg: #1d4ed8;
+  --btn-primary-hover: #2563eb;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #f1f5f9;
+  --btn-secondary-hover: #e2e8f0;
+  --btn-secondary-text: #1e293b;
+
+  /* Cores de destaque (serão sobrescritas por data-color-theme) */
+  --accent-color: #3b82f6;
+  --accent-light: #eff6ff;
+  --accent-soft: #dbeafe;
+
+  /* Inputs */
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --input-focus: #3b82f6;
+}
+
+/* ===== TEMA ESCURO ===== */
+[data-theme="dark"] {
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-light: #334155;
+  --border-strong: #475569;
+
+  --sidebar-bg: #020617;
+  --sidebar-text: #e2e8f0;
+  --sidebar-hover: #1e293b;
+
+  --btn-primary-bg: #3b82f6;
+  --btn-primary-hover: #60a5fa;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #334155;
+  --btn-secondary-hover: #475569;
+  --btn-secondary-text: #f1f5f9;
+
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --input-focus: #60a5fa;
+}
+
+/* ===== TEMAS DE COR (AZUL, VERDE, ROXO) ===== */
+[data-color-theme="azul"] {
+  --accent-color: #3b82f6;
+  --accent-light: #eff6ff;
+  --accent-soft: #dbeafe;
+}
+
+[data-color-theme="verde"] {
+  --accent-color: #16a34a;
+  --accent-light: #f0fdf4;
+  --accent-soft: #dcfce7;
+}
+
+[data-color-theme="roxo"] {
+  --accent-color: #7c3aed;
+  --accent-light: #f5f3ff;
+  --accent-soft: #ede9fe;
+}
+
+/* ===== ANIMAÇÕES ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -67,22 +152,22 @@ body {
   }
 }
 
-/* classes utilitárias */
+/* ===== CLASSES UTILITÁRIAS (agora com variáveis) ===== */
 .action-btn {
   background: none;
   border: none;
   cursor: pointer;
   padding: 7px;
   border-radius: 8px;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.18s;
   display: flex;
   align-items: center;
 }
 
 .action-btn:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--accent-light);
+  color: var(--accent-color);
 }
 
 .action-btn.danger:hover {
@@ -92,20 +177,53 @@ body {
 
 .input-f {
   width: 100%;
-  background: white;
-  border: 1.5px solid #e2e8f0;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
   border-radius: 9px;
   padding: 9px 12px;
   font-size: 13.5px;
   font-family: "Outfit", sans-serif;
-  color: #0f172a;
+  color: var(--text-primary);
   outline: none;
   transition: all 0.2s;
 }
 
 .input-f:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--input-focus) 10%, transparent);
 }
 
-/* ... outras classes que são usadas em múltiplos componentes */
+/* Exemplo de como estilizar cards e containers */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* Ajustes para o Layout da Sidebar (exemplo) */
+.sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+}
+
+.sidebar a:hover {
+  background-color: var(--sidebar-hover);
+}
+
+/* Botões primários */
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-hover);
+}

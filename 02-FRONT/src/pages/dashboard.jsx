@@ -15,7 +15,7 @@ import "../styles/dashboard.css";
 export default function Dashboard() {
   const { user } = useAuth();
   const hoje = new Date();
-  const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const primeiroDiaMes = new Date(hoje.getFullYear(), 0, 1);
   const [dataInicio, setDataInicio] = useState(
     primeiroDiaMes.toISOString().slice(0, 10),
   );
@@ -48,7 +48,7 @@ export default function Dashboard() {
         setBarData(barData);
         setPieData(pieData);
         setKpiData(kpiData);
-        setClientes(clientes); // Reseta o cliente ao carregar novos dados
+        setClientes(clientes);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -60,7 +60,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container" onClick={() => setOpenSelect(null)}>
-      {/* ...style igual... */}
       <main
         style={{
           flex: 1,
@@ -77,8 +76,8 @@ export default function Dashboard() {
           setDataInicio={setDataInicio}
           dataFim={dataFim}
           setDataFim={setDataFim}
-          periodo={periodo} // ← adicione
-          setPeriodo={setPeriodo} // ← adicione
+          periodo={periodo}
+          setPeriodo={setPeriodo}
           periodos={PERIODOS}
           tipo={tipo}
           setTipo={setTipo}

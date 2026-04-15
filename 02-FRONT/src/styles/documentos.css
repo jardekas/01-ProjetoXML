@@ -1,37 +1,17 @@
-/* Estilos específicos para a página de documentos */
 .documentos-container {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-page);
   font-family: "Outfit", "Segoe UI", sans-serif;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
-/* Botão de importar */
-.import-btn {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 11px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: "Outfit", sans-serif;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-}
-
-.import-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
-}
-
-/* Botão de Impressão */
+.import-btn,
 .impress-btn {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  background: linear-gradient(
+    135deg,
+    var(--btn-primary-bg),
+    var(--accent-color)
+  );
   color: white;
   border: none;
   border-radius: 10px;
@@ -47,69 +27,66 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
+.import-btn:hover,
 .impress-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
 
-/* Botões de ação na tabela */
 .action-btn {
   background: none;
   border: none;
   cursor: pointer;
   padding: 7px;
   border-radius: 8px;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.18s;
   display: flex;
   align-items: center;
 }
 
 .action-btn:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--accent-light);
+  color: var(--accent-color);
 }
 
-/* Checkbox da tabela */
 .row-check {
   width: 16px;
   height: 16px;
-  accent-color: #1d4ed8;
+  accent-color: var(--accent-color);
   cursor: pointer;
 }
 
-/* Input de filtro */
 .input-f {
-  background: white;
-  border: 1.5px solid #e2e8f0;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
   border-radius: 9px;
   padding: 9px 12px 9px 36px;
   font-size: 13.5px;
   font-family: "Outfit", sans-serif;
-  color: #0f172a;
+  color: var(--text-primary);
   outline: none;
   transition: all 0.2s;
   width: 100%;
 }
 
 .input-f:focus {
-  border-color: #3b82f6;
+  border-color: var(--input-focus);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .input-f::placeholder {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
-/* Select de filtro */
 .select-f {
-  background: white;
-  border: 1.5px solid #e2e8f0;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
   border-radius: 9px;
   padding: 9px 12px;
   font-size: 13.5px;
   font-family: "Outfit", sans-serif;
-  color: #0f172a;
+  color: var(--text-primary);
   outline: none;
   cursor: pointer;
   transition: all 0.2s;
@@ -118,6 +95,6 @@
 }
 
 .select-f:focus {
-  border-color: #3b82f6;
+  border-color: var(--input-focus);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
