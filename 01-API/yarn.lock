@@ -133,29 +133,6 @@
   dependencies:
     "@prisma/debug" "6.19.3"
 
-"@projetoacbr/acbrlib-base-node@latest":
-  version "1.0.11"
-  resolved "https://registry.npmjs.org/@projetoacbr/acbrlib-base-node/-/acbrlib-base-node-1.0.11.tgz"
-  integrity sha512-cLCPhBbq11f7G9mRSZDOwqnnDBkXElGlbje9dOr7JK3Jw4Y0hYVtZ+ZWJrwRQeu+OtM74muquS1MTJ2sw36kMg==
-  dependencies:
-    koffi "^2.12.0"
-
-"@projetoacbr/acbrlib-dfe-node@latest":
-  version "1.0.10"
-  resolved "https://registry.npmjs.org/@projetoacbr/acbrlib-dfe-node/-/acbrlib-dfe-node-1.0.10.tgz"
-  integrity sha512-2zCowzVGlv+zjTuZVg8dAPJ2tbffbCzYyAzHn8T6sBaQln22yiL84/eDnzb011nj4pO8JMg1nW51hui3SBAdFA==
-  dependencies:
-    "@projetoacbr/acbrlib-base-node" latest
-    koffi "^2.12.0"
-
-"@projetoacbr/acbrlib-nfe-node@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.npmjs.org/@projetoacbr/acbrlib-nfe-node/-/acbrlib-nfe-node-1.0.9.tgz"
-  integrity sha512-3Q+oyuJDXwoAI6vXIG0q97zX1exLdZUGY83kUWOGxr7d2i7wEnp1li8eUPIB0VEUYlKKBUqBOZ18yj7BkiUiyA==
-  dependencies:
-    "@projetoacbr/acbrlib-dfe-node" latest
-    koffi "^2.12.0"
-
 "@scarf/scarf@=1.4.0":
   version "1.4.0"
   resolved "https://registry.npmjs.org/@scarf/scarf/-/scarf-1.4.0.tgz"
@@ -1374,11 +1351,6 @@ jws@^4.0.1:
   dependencies:
     jwa "^2.0.1"
     safe-buffer "^5.0.1"
-
-koffi@^2.12.0:
-  version "2.15.6"
-  resolved "https://registry.npmjs.org/koffi/-/koffi-2.15.6.tgz"
-  integrity sha512-WQBpM5uo74UQ17UpsFN+PUOrQQg4/nYdey4SGVluQun2drYYfePziLLWdSmFb4wSdWlJC1aimXQnjhPCheRKuw==
 
 lazystream@^1.0.0:
   version "1.0.1"

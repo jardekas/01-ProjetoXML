@@ -19,7 +19,10 @@ export const authMiddleware = (req, res, next) => {
     req.user = {
       id: decoded.id,
       email: decoded.email,
-      // Outros campos que você incluiu no payload do JWT
+      flg_master: decoded.flg_master,
+      flg_conta: decoded.flg_conta,
+      idContador: decoded.idContador,
+      EMPcpfCNPJ: decoded.EMPcpfCNPJ,
     };
     next();
   } catch (error) {

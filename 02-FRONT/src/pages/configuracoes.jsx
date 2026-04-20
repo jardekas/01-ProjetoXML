@@ -2,7 +2,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useState, useEffect, useContext } from "react";
 import ToggleSwitch from "../components/ToggleSwitch";
 import TemaSelector from "../components/TemaSelector";
-import UploadArea from "../components/UploadArea";
+/*import UploadArea from "../components/UploadArea";*/
 import InputField from "../components/InputField";
 import Toast from "../components/Toast";
 import { maskCNPJ, maskCPF } from "../utils/mask";
@@ -22,7 +22,7 @@ export default function Configuracoes() {
   // Estados locais para UI (refletem o contexto)
   const [temaAtivo, setTemaAtivo] = useState(tema);
   const [modoEscuroLocal, setModoEscuroLocal] = useState(modoEscuro);
-  const [logoFile, setLogoFile] = useState(null);
+  /*const [logoFile, setLogoFile] = useState(null);*/
   const [hoverTema, setHoverTema] = useState(null);
 
   // Dados do usuário (nome, email, senha, etc.)
@@ -65,10 +65,13 @@ export default function Configuracoes() {
       setModoEscuro(modoEscuroLocal);
 
       // 2. Upload da logo (se houver arquivo selecionado)
-      if (logoFile && logoFile instanceof File) {
-        // Implemente o endpoint de upload de logo para contador, se necessário
+      {
+        /*if (logoFile && logoFile instanceof File) {
+        // Em reunião foi definido a remover. Quando for usar
+        // Criar o endpoint de upload de logo para contador, se necessário
         // await configService.uploadLogo(logoFile, user.idContador);
         console.warn("Upload de logo ainda não implementado no backend.");
+      */
       }
 
       // 3. Salvar dados do usuário (nome, email, senha, etc.)
@@ -254,13 +257,13 @@ export default function Configuracoes() {
               setHoverTema={setHoverTema}
             />
 
-            <div className="divider" />
+            {/*<div className="divider" />
 
             <UploadArea
               file={logoFile}
               onFileChange={setLogoFile}
               onFileRemove={() => setLogoFile(null)}
-            />
+            />*/}
           </div>
 
           {/* RIGHT: Dados do Usuário */}
@@ -345,116 +348,130 @@ export default function Configuracoes() {
               </div>
 
               {/* CRC — só para contadores */}
-              {Contador && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 14,
+                }}
+              >
+                {Contador && (
+                  <InputField
+                    label="CRC"
+                    value={dados.crc}
+                    onChange={(e) =>
+                      setDados((d) => ({ ...d, crc: e.target.value }))
+                    }
+                    onFocus={() => setFocusedField("crc")}
+                    onBlur={() => setFocusedField(null)}
+                    focused={focusedField === "crc"}
+                    placeholder="0SP000000/O-0"
+                    monospace={true}
+                  />
+                )}
+                {/* E-mail */}
                 <InputField
-                  label="CRC"
-                  value={dados.crc}
+                  label="E-mail"
+                  value={dados.email}
                   onChange={(e) =>
-                    setDados((d) => ({ ...d, crc: e.target.value }))
+                    setDados((d) => ({ ...d, email: e.target.value }))
                   }
-                  onFocus={() => setFocusedField("crc")}
+                  onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
-                  focused={focusedField === "crc"}
-                  placeholder="0SP000000/O-0"
-                  monospace={true}
+                  focused={focusedField === "email"}
+                  placeholder="contador@empresa.com"
+                  icon={
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={
+                        focusedField === "email"
+                          ? "var(--accent-color)"
+                          : "var(--text-muted)"
+                      }
+                      strokeWidth="2"
+                    >
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                      <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                  }
+                />{" "}
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 14,
+                }}
+              >
+                {/* Senha */}
+                <InputField
+                  label="Senha"
+                  value={dados.senha}
+                  onChange={(e) =>
+                    setDados((d) => ({ ...d, senha: e.target.value }))
+                  }
+                  onFocus={() => setFocusedField("senha")}
+                  onBlur={() => setFocusedField(null)}
+                  focused={focusedField === "senha"}
+                  placeholder="******"
+                  type="password"
+                  icon={
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={
+                        focusedField === "senha"
+                          ? "var(--accent-color)"
+                          : "var(--text-muted)"
+                      }
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  }
                 />
-              )}
 
-              {/* E-mail */}
-              <InputField
-                label="E-mail"
-                value={dados.email}
-                onChange={(e) =>
-                  setDados((d) => ({ ...d, email: e.target.value }))
-                }
-                onFocus={() => setFocusedField("email")}
-                onBlur={() => setFocusedField(null)}
-                focused={focusedField === "email"}
-                placeholder="contador@empresa.com"
-                icon={
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={
-                      focusedField === "email"
-                        ? "var(--accent-color)"
-                        : "var(--text-muted)"
-                    }
-                    strokeWidth="2"
-                  >
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
-                  </svg>
-                }
-              />
-
-              {/* Senha */}
-              <InputField
-                label="Senha"
-                value={dados.senha}
-                onChange={(e) =>
-                  setDados((d) => ({ ...d, senha: e.target.value }))
-                }
-                onFocus={() => setFocusedField("senha")}
-                onBlur={() => setFocusedField(null)}
-                focused={focusedField === "senha"}
-                placeholder="******"
-                type="password"
-                icon={
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={
-                      focusedField === "senha"
-                        ? "var(--accent-color)"
-                        : "var(--text-muted)"
-                    }
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                }
-              />
-
-              {/* Confirmar Senha */}
-              <InputField
-                label="Confirmar Senha"
-                value={dados.confirmarSenha}
-                onChange={(e) =>
-                  setDados((d) => ({ ...d, confirmarSenha: e.target.value }))
-                }
-                onFocus={() => setFocusedField("confirmarSenha")}
-                onBlur={() => setFocusedField(null)}
-                focused={focusedField === "confirmarSenha"}
-                placeholder="******"
-                type="password"
-                icon={
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={
-                      focusedField === "confirmarSenha"
-                        ? "var(--accent-color)"
-                        : "var(--text-muted)"
-                    }
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                }
-              />
+                {/* Confirmar Senha */}
+                <InputField
+                  label="Confirmar Senha"
+                  value={dados.confirmarSenha}
+                  onChange={(e) =>
+                    setDados((d) => ({ ...d, confirmarSenha: e.target.value }))
+                  }
+                  onFocus={() => setFocusedField("confirmarSenha")}
+                  onBlur={() => setFocusedField(null)}
+                  focused={focusedField === "confirmarSenha"}
+                  placeholder="******"
+                  type="password"
+                  icon={
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={
+                        focusedField === "confirmarSenha"
+                          ? "var(--accent-color)"
+                          : "var(--text-muted)"
+                      }
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  }
+                />
+              </div>
 
               {erro && (
                 <div
@@ -470,7 +487,7 @@ export default function Configuracoes() {
                 </div>
               )}
 
-              <div className="divider" style={{ margin: "4px 0" }} />
+              {/*<div className="divider" style={{ margin: "4px 0" }} />*/}
 
               <button
                 className={`save-btn${saved ? " saved" : ""}`}

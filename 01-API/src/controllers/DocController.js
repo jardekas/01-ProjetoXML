@@ -4,9 +4,11 @@ import {
   getDocService,
   getDocByCnpjService,
   marcarBaixadoService,
+  getEmpresasDistintasService,
 } from "../services/DocService.js";
 import fs from "fs";
 import { DocModel } from "../models/DocModel.js";
+import { prisma } from "../db.js";
 
 //Marcado como baixado dos documentos
 export const marcarBaixado = async (req, res) => {
@@ -64,6 +66,47 @@ export const downloadXMLs = async (req, res) => {
   }
 };
 
+export const getEmpresas = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) return res.status(401).json({ error: "Usuário não encontrado" });
+    let empresas = [];
+
+    if (user.flg_master) {
+      empresas = await getEmpresasDistintasService(null, true);
+    } else if (user.flg_conta) {
+      empresas = await getEmpresasDistintasService(user.idContador, false);
+    } else {
+      // Empresa comum: busca apenas o próprio CNPJ
+      if (user.EMPcpfCNPJ) {
+        empresas = await prisma.document.findMany({
+          distinct: ["EMPcpfCNPJ"],
+          where: { EMPcpfCNPJ: user.EMPcpfCNPJ },
+          select: { EMPcpfCNPJ: true, nomeEmp: true },
+          take: 1,
+        });
+      }
+    }
+
+    const seen = new Set();
+    const resultado = empresas
+      .filter((e) => {
+        if (seen.has(e.EMPcpfCNPJ)) return false;
+        seen.add(e.EMPcpfCNPJ);
+        return true;
+      })
+      .map((e) => ({
+        EMPcpfCNPJ: e.EMPcpfCNPJ,
+        nomeEmp: e.nomeEmp,
+      }));
+
+    res.json(resultado);
+  } catch (error) {
+    console.error("Erro ao buscar empresas:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 //Upload XML
 export const createDoc = async (req, res) => {
   try {
@@ -83,17 +126,40 @@ export const createDoc = async (req, res) => {
 
 export const getDoc = async (req, res) => {
   try {
-    const { id, cnpj, todos, contadorId } = req.query;
+    const { id, todos } = req.query;
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) return res.status(401).json({ error: "Usuário não encontrado" });
 
-    if (cnpj || contadorId) {
+    // Master: acesso total
+    if (user.flg_master) {
       const docs = await getDocByCnpjService(
-        cnpj,
+        null,
         todos === "true",
-        contadorId ? Number(contadorId) : null,
+        null,
+        true,
       );
       return res.json(docs);
     }
 
+    // Contador: apenas CNPJs vinculados em CONTADOR_EMPRESA
+    if (user.flg_conta) {
+      if (!user.idContador) return res.json([]);
+      const docs = await getDocByCnpjService(
+        null,
+        todos === "true",
+        user.idContador,
+        false,
+      );
+      return res.json(docs);
+    }
+
+    // Empresa: apenas próprio CNPJ
+    if (user.EMPcpfCNPJ) {
+      const docs = await getDocByCnpjService(user.EMPcpfCNPJ, todos === "true");
+      return res.json(docs);
+    }
+
+    // Busca por IDs (fallback)
     const ids = id
       ? String(id)
           .split(",")
@@ -101,7 +167,6 @@ export const getDoc = async (req, res) => {
           .filter((v) => !isNaN(v))
       : null;
     const docs = await getDocService(ids);
-
     res.json(docs);
   } catch (error) {
     res.status(500).json({ error: error.message });

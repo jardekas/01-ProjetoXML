@@ -4,6 +4,7 @@ import { maskCPF, maskCNPJ } from "../utils/mask";
 
 export default function UserTable({
   users,
+  currentUserId,
   hoverRow,
   setHoverRow,
   onEdit,
@@ -27,9 +28,9 @@ export default function UserTable({
   };
 
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <table className="user-table">
       <thead>
-        <tr style={{ background: "#f8fafc" }}>
+        <tr>
           {[
             "Nome",
             "CPF",
@@ -39,19 +40,7 @@ export default function UserTable({
             "Data Criação",
             "Ações",
           ].map((h) => (
-            <th
-              key={h}
-              style={{
-                padding: "12px 20px",
-                textAlign: h === "Ações" ? "right" : "left",
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#64748b",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <th key={h} style={{ textAlign: h === "Ações" ? "right" : "left" }}>
               {h}
             </th>
           ))}
@@ -68,68 +57,34 @@ export default function UserTable({
               key={u.id}
               onMouseEnter={() => setHoverRow(u.id)}
               onMouseLeave={() => setHoverRow(null)}
-              style={{
-                borderTop: "1px solid #f1f5f9",
-                background: hoverRow === u.id ? "#fafbfc" : "white",
-                transition: "background 0.15s",
-                animation: `fadeIn 0.3s ease ${i * 0.06}s both`,
-              }}
+              className={hoverRow === u.id ? "user-row-hover" : ""}
+              style={{ animation: `fadeIn 0.3s ease ${i * 0.06}s both` }}
             >
-              {/* Nome */}
-              <td style={{ padding: "14px 20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <td>
+                <div className="user-cell-name">
                   <div className="avatar" style={{ background: avatarBg }}>
                     {initials}
                   </div>
-                  <span
-                    style={{ fontWeight: 600, fontSize: 14, color: "#0f172a" }}
-                  >
-                    {u.nome}
-                  </span>
+                  <span className="user-name">{u.nome}</span>
                 </div>
               </td>
 
-              {/* CPF */}
-              <td style={{ padding: "14px 20px" }}>
+              <td>
+                <span className="user-cell-mono">{maskCPF(u.cpf)}</span>
+              </td>
+
+              <td>
+                <span className="user-cell-email">{maskCNPJ(u.cnpj)}</span>
+              </td>
+
+              <td>
+                <span className="user-cell-email">{u.email}</span>
+              </td>
+
+              <td>
                 <span
-                  style={{
-                    fontSize: 13.5,
-                    color: "#64748b",
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  {maskCPF(u.cpf)}
-                </span>
-              </td>
-
-              {/* CNPJ */}
-              <td style={{ padding: "14px 20px" }}>
-                <span style={{ fontSize: 13.5, color: "#475569" }}>
-                  {maskCNPJ(u.cnpj)}
-                </span>
-              </td>
-
-              {/* E-mail */}
-              <td style={{ padding: "14px 20px" }}>
-                <span style={{ fontSize: 13.5, color: "#475569" }}>
-                  {u.email}
-                </span>
-              </td>
-
-              {/* Tipo */}
-              <td style={{ padding: "14px 20px" }}>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    background: ts.bg,
-                    color: ts.text,
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    borderRadius: 20,
-                    padding: "4px 12px",
-                  }}
+                  className="user-type-badge"
+                  style={{ background: ts.bg, color: ts.text }}
                 >
                   <svg
                     width="12"
@@ -146,29 +101,12 @@ export default function UserTable({
                 </span>
               </td>
 
-              {/* Data Criação */}
-              <td style={{ padding: "14px 20px" }}>
-                <span
-                  style={{
-                    fontSize: 13.5,
-                    color: "#64748b",
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  {u.criacao}
-                </span>
+              <td>
+                <span className="user-cell-mono">{u.criacao}</span>
               </td>
 
-              {/* Ações */}
-              <td style={{ padding: "14px 20px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 2,
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  {/* Permissões e Editar — só para não contadores */}
+              <td>
+                <div className="user-actions">
                   {u.tipo !== "Contador" && (
                     <>
                       <button
@@ -209,12 +147,16 @@ export default function UserTable({
                       </button>
                     </>
                   )}
-
-                  {/* Lixeira — para todos */}
                   <button
                     className="action-btn danger"
+                    disabled={u.id === currentUserId}
                     title={u.tipo === "Contador" ? "Desvincular" : "Excluir"}
                     onClick={() => onDelete(u.id, u.tipo === "Contador")}
+                    style={{
+                      opacity: u.id === currentUserId ? 0.4 : 1,
+                      cursor:
+                        u.id === currentUserId ? "not-allowed" : "pointer",
+                    }}
                   >
                     <svg
                       width="16"
@@ -239,10 +181,7 @@ export default function UserTable({
 
         {users.length === 0 && (
           <tr>
-            <td
-              colSpan={7}
-              style={{ padding: "48px", textAlign: "center", color: "#94a3b8" }}
-            >
+            <td colSpan={7} className="user-empty-state">
               <svg
                 width="36"
                 height="36"
@@ -250,7 +189,7 @@ export default function UserTable({
                 fill="none"
                 stroke="#cbd5e1"
                 strokeWidth="1.5"
-                style={{ display: "block", margin: "0 auto 12px" }}
+                className="user-empty-icon"
               >
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -271,4 +210,5 @@ UserTable.propTypes = {
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onPermissions: PropTypes.func.isRequired,
+  currentUserId: PropTypes.number,
 };

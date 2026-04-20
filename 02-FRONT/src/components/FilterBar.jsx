@@ -2,14 +2,12 @@ import PropTypes from "prop-types";
 import SelectDropdown from "./SelectDropdown";
 
 export default function FilterBar({
-  // Props para o Dashboard
   periodo,
   setPeriodo,
   tipo,
   setTipo,
   cliente,
   setCliente,
-  periodos,
   tipos,
   clientes,
   onClearFilters,
@@ -17,8 +15,6 @@ export default function FilterBar({
   setDataInicio,
   dataFim,
   setDataFim,
-
-  // Props para a página de Documentos
   busca,
   setBusca,
   numDoc,
@@ -30,39 +26,18 @@ export default function FilterBar({
   setTipoFiltro,
   statusFiltro,
   setStatusFiltro,
-
-  // Props comuns
   openSelect,
   setOpenSelect,
 }) {
-  // Determina qual layout renderizar baseado nas props recebidas
   const isDashboardLayout = periodo !== undefined && setPeriodo !== undefined;
 
   if (isDashboardLayout) {
-    // Layout do Dashboard
     return (
       <div
-        style={{
-          background: "white",
-          borderRadius: 14,
-          border: "1px solid #e2e8f0",
-          padding: "22px 24px",
-          marginBottom: 22,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-          animation: "fadeIn 0.4s ease 0.05s both",
-          position: "relative",
-          zIndex: 50,
-        }}
+        className="filter-bar filter-bar--dashboard"
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 7,
-            marginBottom: 18,
-          }}
-        >
+        <div className="filter-bar__header">
           <svg
             width="15"
             height="15"
@@ -73,99 +48,11 @@ export default function FilterBar({
           >
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
           </svg>
-          <span style={{ fontSize: 15, fontWeight: 700, zIndex: 100 }}>
-            Filtros
-          </span>
+          <span>Filtros</span>
         </div>
-
-        {/* Container flex para Data Início e Data Fim */}
-        <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#64748b",
-                marginBottom: 8,
-                textTransform: "uppercase",
-              }}
-            >
-              Data Início
-            </div>
-            <input
-              type="date"
-              className="input-f"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#64748b",
-                marginBottom: 8,
-                textTransform: "uppercase",
-              }}
-            >
-              Data Fim
-            </div>
-            <input
-              type="date"
-              className="input-f"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: 14,
-            alignItems: "flex-end",
-            zIndex: 100,
-          }}
-        >
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                zIndex: 100,
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#64748b",
-                marginBottom: 8,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Período
-            </div>
-            <SelectDropdown
-              id="periodo"
-              value={periodo}
-              setValue={setPeriodo}
-              options={periodos}
-              placeholder="Selecione o período"
-              openSelect={openSelect}
-              setOpenSelect={setOpenSelect}
-            />
-          </div>
-
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#64748b",
-                marginBottom: 8,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Tipo de Documento
-            </div>
+        <div className="filter-bar__row">
+          <div className="filter-bar__control-group">
+            <div className="filter-bar__control-label">Tipo de Documento</div>
             <SelectDropdown
               id="tipo"
               value={tipo}
@@ -176,20 +63,29 @@ export default function FilterBar({
               setOpenSelect={setOpenSelect}
             />
           </div>
+          <div className="filter-bar__date-group">
+            <div className="filter-bar__date-label">Data Início</div>
+            <input
+              type="date"
+              className="input-f"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+            />
+          </div>
+          <div className="filter-bar__date-group">
+            <div className="filter-bar__date-label">Data Fim</div>
+            <input
+              type="date"
+              className="input-f"
+              value={dataFim}
+              onChange={(e) => setDataFim(e.target.value)}
+            />
+          </div>
+        </div>
 
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#64748b",
-                marginBottom: 8,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Cliente
-            </div>
+        <div className="filter-bar__controls-row">
+          <div className="filter-bar__control-group">
+            <div className="filter-bar__control-label">Cliente</div>
             <SelectDropdown
               id="cliente"
               value={cliente}
@@ -200,34 +96,7 @@ export default function FilterBar({
               setOpenSelect={setOpenSelect}
             />
           </div>
-          <button
-            onClick={onClearFilters}
-            style={{
-              background: "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-              border: "none",
-              borderRadius: 9,
-              padding: "11px 28px",
-              fontSize: 14,
-              fontWeight: 600,
-              fontFamily: "inherit",
-              color: "white",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              boxShadow: "0 4px 12px rgba(37,99,235,0.22)",
-              transition: "all 0.2s",
-              flexShrink: 0,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow =
-                "0 8px 18px rgba(37,99,235,0.32)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(37,99,235,0.22)";
-            }}
-          >
+          <button className="btn-clear-filters" onClick={onClearFilters}>
             Limpar Filtros
           </button>
         </div>
@@ -235,26 +104,10 @@ export default function FilterBar({
     );
   }
 
-  // Layout da página de Documentos
+  // Layout Documentos
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: 14,
-        border: "1px solid #e2e8f0",
-        padding: "22px 24px",
-        marginBottom: 20,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 18,
-        }}
-      >
+    <div className="filter-bar filter-bar--docs">
+      <div className="filter-bar__header">
         <svg
           width="16"
           height="16"
@@ -265,42 +118,15 @@ export default function FilterBar({
         >
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </svg>
-        <span style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>
-          Filtros
-        </span>
+        <span>Filtros</span>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1.6fr 0.8fr 0.8fr",
-          gap: 14,
-          alignItems: "end",
-        }}
-      >
-        {/* Busca por Chave */}
-        <div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#64748b",
-              marginBottom: 7,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Buscar Chave
-          </div>
-          <div style={{ position: "relative" }}>
+      <div className="filter-docs-grid">
+        <div className="filter-docs-field">
+          <div className="filter-docs-label">Buscar Chave</div>
+          <div className="filter-docs-search-wrapper">
             <svg
-              style={{
-                position: "absolute",
-                left: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-              }}
+              className="filter-docs-search-icon"
               width="14"
               height="14"
               viewBox="0 0 24 24"
@@ -312,46 +138,19 @@ export default function FilterBar({
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
-              className="input-f"
+              className="filter-docs-search-input"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Chave de acesso..."
-              style={{
-                background: "white",
-                border: "1.5px solid #e2e8f0",
-                borderRadius: 9,
-                padding: "9px 12px 9px 36px",
-                fontSize: 13.5,
-                width: "100%",
-                outline: "none",
-              }}
             />
           </div>
         </div>
 
-        {/* N° Documento */}
-        <div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#64748b",
-              marginBottom: 7,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            N° Documento
-          </div>
-          <div style={{ position: "relative" }}>
+        <div className="filter-docs-field">
+          <div className="filter-docs-label">N° Documento</div>
+          <div className="filter-docs-search-wrapper">
             <svg
-              style={{
-                position: "absolute",
-                left: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-              }}
+              className="filter-docs-search-icon"
               width="14"
               height="14"
               viewBox="0 0 24 24"
@@ -363,37 +162,16 @@ export default function FilterBar({
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
-              className="input-f"
+              className="filter-docs-search-input"
               value={numDoc}
               onChange={(e) => setNumDoc(e.target.value)}
               placeholder="Número..."
-              style={{
-                background: "white",
-                border: "1.5px solid #e2e8f0",
-                borderRadius: 9,
-                padding: "9px 12px 9px 36px",
-                fontSize: 13.5,
-                width: "100%",
-                outline: "none",
-              }}
             />
           </div>
         </div>
 
-        {/* Cliente */}
-        <div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#64748b",
-              marginBottom: 7,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Cliente
-          </div>
+        <div className="filter-docs-field">
+          <div className="filter-docs-label">Cliente</div>
           <SelectDropdown
             id="clienteFiltro"
             value={clienteFiltro}
@@ -408,49 +186,21 @@ export default function FilterBar({
           />
         </div>
 
-        {/* Tipo */}
-        <div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#64748b",
-              marginBottom: 7,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Tipo
-          </div>
-          <div style={{ position: "relative" }}>
+        <div className="filter-docs-field">
+          <div className="filter-docs-label">Tipo</div>
+          <div className="filter-docs-select-wrapper">
             <select
+              className="select-f"
               value={tipoFiltro}
               onChange={(e) => setTipoFiltro(e.target.value)}
-              style={{
-                background: "white",
-                border: "1.5px solid #e2e8f0",
-                borderRadius: 9,
-                padding: "9px 12px",
-                fontSize: 13.5,
-                width: "100%",
-                outline: "none",
-                appearance: "none",
-              }}
             >
               {["Todos", "NFe", "NFCe", "CTe", "NFSe", "NFCom", "NF3e"].map(
                 (t) => (
-                  <option key={t}>{t}</option> // alterar a lista de apresentação no arquivo filterBar.jsx.
+                  <option key={t}>{t}</option>
                 ),
               )}
             </select>
             <svg
-              style={{
-                position: "absolute",
-                right: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-              }}
               width="13"
               height="13"
               viewBox="0 0 24 24"
@@ -463,47 +213,19 @@ export default function FilterBar({
           </div>
         </div>
 
-        {/* Status */}
-        <div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#64748b",
-              marginBottom: 7,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Status
-          </div>
-          <div style={{ position: "relative" }}>
+        <div className="filter-docs-field">
+          <div className="filter-docs-label">Status</div>
+          <div className="filter-docs-select-wrapper">
             <select
+              className="select-f"
               value={statusFiltro}
               onChange={(e) => setStatusFiltro(e.target.value)}
-              style={{
-                background: "white",
-                border: "1.5px solid #e2e8f0",
-                borderRadius: 9,
-                padding: "9px 12px",
-                fontSize: 13.5,
-                width: "100%",
-                outline: "none",
-                appearance: "none",
-              }}
             >
               {["Todos", "Autorizada", "Com Problema", "Cancelada"].map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </select>
             <svg
-              style={{
-                position: "absolute",
-                right: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-              }}
               width="13"
               height="13"
               viewBox="0 0 24 24"

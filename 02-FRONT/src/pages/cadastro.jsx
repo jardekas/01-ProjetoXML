@@ -7,7 +7,6 @@ import "../styles/usuarios.css";
 
 export default function Cadastro() {
   const [cnpjsVinculados, setCnpjsVinculados] = useState([]);
-  const [novoCnpj, setNovoCnpj] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
@@ -24,25 +23,6 @@ export default function Cadastro() {
     confirmarSenha: "",
     crc: "",
   });
-
-  const adicionarCnpj = () => {
-    const cnpjLimpo = novoCnpj.replace(/\D/g, "");
-    if (cnpjLimpo.length !== 14) {
-      setErro("CNPJ inválido");
-      return;
-    }
-    if (cnpjsVinculados.includes(cnpjLimpo)) {
-      setErro("CNPJ já adicionado");
-      return;
-    }
-    setCnpjsVinculados((prev) => [...prev, cnpjLimpo]);
-    setNovoCnpj("");
-    setErro("");
-  };
-
-  const removerCnpj = (cnpj) => {
-    setCnpjsVinculados((prev) => prev.filter((c) => c !== cnpj));
-  };
 
   const handleChange = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -61,7 +41,6 @@ export default function Cadastro() {
     try {
       const { user: novoUser } = await userService.createUser(form);
 
-      // Se for contador e tiver CNPJs, vincula todos
       if (
         form.tipo === "Contador" &&
         cnpjsVinculados.length &&
@@ -157,34 +136,10 @@ export default function Cadastro() {
 
   return (
     <div className="usuarios-container">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-        * { box-sizing: border-box; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-      `}</style>
-
-      <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: 28,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                background: "#eff6ff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+      <main className="cadastro-main">
+        <div className="cadastro-header">
+          <div className="cadastro-header-left">
+            <div className="cadastro-header-icon">
               <svg
                 width="22"
                 height="22"
@@ -200,19 +155,8 @@ export default function Cadastro() {
               </svg>
             </div>
             <div>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: 28,
-                  fontWeight: 700,
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                Cadastro de Usuário
-              </h1>
-              <p
-                style={{ margin: "3px 0 0", fontSize: 13.5, color: "#64748b" }}
-              >
+              <h1 className="cadastro-title">Cadastro de Usuário</h1>
+              <p className="cadastro-subtitle">
                 Crie um novo acesso ao sistema
               </p>
             </div>
@@ -236,47 +180,16 @@ export default function Cadastro() {
           </button>
         </div>
 
-        {/* Card */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: 16,
-            border: "1px solid #e2e8f0",
-            padding: 32,
-            maxWidth: 680,
-            animation: "fadeIn 0.4s ease",
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 4px",
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#0f172a",
-            }}
-          >
-            Dados do Usuário
-          </h2>
-          <p style={{ margin: "0 0 24px", fontSize: 13, color: "#94a3b8" }}>
+        <div className="cadastro-card">
+          <h2 className="cadastro-card-title">Dados do Usuário</h2>
+          <p className="cadastro-card-desc">
             Preencha os campos obrigatórios (*)
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="cadastro-form">
             {fields.map(({ label, key, placeholder, mask, type }) => (
               <div key={key}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    color: "#64748b",
-                    marginBottom: 7,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {label}
-                </label>
+                <label className="cadastro-label">{label}</label>
                 <input
                   className="input-f"
                   type={type || "text"}
@@ -297,22 +210,9 @@ export default function Cadastro() {
               </div>
             ))}
 
-            {/* Tipo */}
             <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: "#64748b",
-                  marginBottom: 7,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Tipo
-              </label>
-              <div style={{ position: "relative" }}>
+              <label className="cadastro-label">Tipo</label>
+              <div className="select-wrapper">
                 <select
                   className="select-f"
                   value={form.tipo}
@@ -322,13 +222,6 @@ export default function Cadastro() {
                   <option>Contador</option>
                 </select>
                 <svg
-                  style={{
-                    position: "absolute",
-                    right: 10,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    pointerEvents: "none",
-                  }}
                   width="13"
                   height="13"
                   viewBox="0 0 24 24"
@@ -341,136 +234,18 @@ export default function Cadastro() {
               </div>
             </div>
 
-            {form.tipo === "Contador" && (
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    color: "#64748b",
-                    marginBottom: 7,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  CNPJs Vinculados
-                </label>
+            {erro && <div className="cadastro-error">{erro}</div>}
+            {sucesso && <div className="cadastro-success">{sucesso}</div>}
 
-                {/* Lista de CNPJs adicionados */}
-                {cnpjsVinculados.map((cnpj) => (
-                  <div
-                    key={cnpj}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "8px 12px",
-                      background: "#f8fafc",
-                      borderRadius: 8,
-                      marginBottom: 6,
-                      border: "1px solid #e2e8f0",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: 13,
-                      }}
-                    >
-                      {maskCNPJ(cnpj)}
-                    </span>
-                    <button
-                      onClick={() => removerCnpj(cnpj)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "#dc2626",
-                        padding: 4,
-                      }}
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-
-                {/* Input para novo CNPJ */}
-                <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                  <input
-                    className="input-f"
-                    placeholder="00.000.000/0000-00"
-                    value={novoCnpj}
-                    onChange={(e) => setNovoCnpj(maskCNPJ(e.target.value))}
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    className="btn-primary"
-                    onClick={adicionarCnpj}
-                    style={{ padding: "8px 16px", whiteSpace: "nowrap" }}
-                  >
-                    + Adicionar
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Erro / Sucesso */}
-            {erro && (
-              <div
-                style={{
-                  color: "#dc2626",
-                  fontSize: 13,
-                  padding: "10px 14px",
-                  background: "#fef2f2",
-                  borderRadius: 8,
-                  border: "1px solid #fecaca",
-                }}
-              >
-                {erro}
-              </div>
-            )}
-            {sucesso && (
-              <div
-                style={{
-                  color: "#15803d",
-                  fontSize: 13,
-                  padding: "10px 14px",
-                  background: "#dcfce7",
-                  borderRadius: 8,
-                  border: "1px solid #bbf7d0",
-                }}
-              >
-                {sucesso}
-              </div>
-            )}
-
-            {/* Botões */}
-            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <div className="cadastro-actions">
               <button
                 className="btn-secondary"
-                style={{ flex: 1 }}
                 onClick={() => navigate("/usuarios")}
               >
                 Cancelar
               </button>
               <button
-                className="btn-primary"
-                style={{
-                  flex: 1,
-                  textAlign: "center",
-                  justifyContent: "center",
-                }}
+                className="btn-primary cadastro-submit"
                 onClick={handleSubmit}
                 disabled={loading}
               >

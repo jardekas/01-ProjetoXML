@@ -37,45 +37,20 @@ export default function PeriodoPickerModal({ isOpen, onClose, onConfirm }) {
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        backdropFilter: "blur(4px)",
-      }}
-      onClick={onClose}
-    >
+    <div className="modal-overlay" onClick={onClose}>
       <div
-        style={{
-          background: "white",
-          borderRadius: 16,
-          padding: 28,
-          width: 320,
-          maxWidth: "90%",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-          animation: "modalIn 0.2s ease",
-        }}
+        className="modal-container modal-container--picker"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 style={{ margin: "0 0 16px", fontSize: 18, fontWeight: 700 }}>
+        <h2 className="modal-title" style={{ marginBottom: 16 }}>
           Selecionar Período
         </h2>
-        <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+
+        <div className="picker-select-group">
           <select
             value={mes}
             onChange={(e) => setMes(Number(e.target.value))}
-            style={{
-              flex: 2,
-              padding: "10px",
-              borderRadius: 8,
-              border: "1.5px solid #e2e8f0",
-              fontSize: 14,
-            }}
+            className="picker-select picker-select--mes"
           >
             {meses.map((m) => (
               <option key={m.value} value={m.value}>
@@ -86,13 +61,7 @@ export default function PeriodoPickerModal({ isOpen, onClose, onConfirm }) {
           <select
             value={ano}
             onChange={(e) => setAno(Number(e.target.value))}
-            style={{
-              flex: 1,
-              padding: "10px",
-              borderRadius: 8,
-              border: "1.5px solid #e2e8f0",
-              fontSize: 14,
-            }}
+            className="picker-select picker-select--ano"
           >
             {anos().map((a) => (
               <option key={a} value={a}>
@@ -101,37 +70,12 @@ export default function PeriodoPickerModal({ isOpen, onClose, onConfirm }) {
             ))}
           </select>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            onClick={onClose}
-            style={{
-              flex: 1,
-              padding: "12px",
-              background: "white",
-              border: "1.5px solid #e2e8f0",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-              color: "#475569",
-            }}
-          >
+
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={onClose}>
             Cancelar
           </button>
-          <button
-            onClick={handleConfirm}
-            style={{
-              flex: 1,
-              padding: "12px",
-              background: "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-              border: "none",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-              color: "white",
-            }}
-          >
+          <button className="btn-primary" onClick={handleConfirm}>
             Aplicar
           </button>
         </div>

@@ -1,53 +1,23 @@
 import PropTypes from "prop-types";
 
 export default function KPICard({ label, icon, value, trend, trendUp, delay }) {
+  const valueClassName =
+    value.length > 12
+      ? "kpi-card-value kpi-card-value--large"
+      : "kpi-card-value";
+  const trendClassName = `kpi-card-trend ${trendUp ? "kpi-card-trend--up" : "kpi-card-trend--down"}`;
+
   return (
     <div
       className="stat-card"
       style={{ animation: `fadeIn 0.4s ease ${delay}s both` }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: 12,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 12.5,
-            fontWeight: 500,
-            color: "#64748b",
-            lineHeight: 1.3,
-          }}
-        >
-          {label}
-        </span>
-        <span style={{ color: "#94a3b8", flexShrink: 0 }}>{icon}</span>
+      <div className="kpi-card-header">
+        <span className="kpi-card-label">{label}</span>
+        <span className="kpi-card-icon">{icon}</span>
       </div>
-      <div
-        style={{
-          fontSize: value.length > 12 ? 17 : 24,
-          fontWeight: 700,
-          letterSpacing: "-0.02em",
-          color: "#0f172a",
-          marginBottom: 8,
-          lineHeight: 1.2,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 500,
-          color: trendUp ? "#16a34a" : "#dc2626",
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-        }}
-      >
+      <div className={valueClassName}>{value}</div>
+      <div className={trendClassName}>
         <svg
           width="11"
           height="11"

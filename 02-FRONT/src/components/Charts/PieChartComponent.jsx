@@ -3,29 +3,11 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function PieChartComponent({ data }) {
   const CustomPieLegend = () => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        justifyContent: "center",
-      }}
-    >
+    <div className="pie-legend-custom">
       {data.map((d) => (
-        <div
-          key={d.name}
-          style={{ display: "flex", alignItems: "center", gap: 10 }}
-        >
-          <div
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 3,
-              background: d.color,
-              flexShrink: 0,
-            }}
-          />
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: d.color }}>
+        <div key={d.name} className="pie-legend-item">
+          <div className="pie-legend-color" style={{ background: d.color }} />
+          <span className="pie-legend-label" style={{ color: d.color }}>
             {d.name} {d.value}%
           </span>
         </div>
@@ -35,15 +17,9 @@ export default function PieChartComponent({ data }) {
 
   return (
     <div className="chart-card">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 9,
-          marginBottom: 6,
-        }}
-      >
+      <div className="chart-header">
         <svg
+          className="chart-header-icon"
           width="18"
           height="18"
           viewBox="0 0 24 24"
@@ -54,24 +30,11 @@ export default function PieChartComponent({ data }) {
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
-        <span
-          style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.02em" }}
-        >
-          Distribuição por Tipo
-        </span>
+        <span className="chart-header-title">Distribuição por Tipo</span>
       </div>
-      <p style={{ margin: "0 0 20px", fontSize: 13, color: "#94a3b8" }}>
-        Participação percentual por tipo
-      </p>
+      <p className="chart-subtitle">Participação percentual por tipo</p>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 24,
-        }}
-      >
+      <div className="pie-chart-wrapper">
         <ResponsiveContainer width={200} height={220}>
           <PieChart>
             <Pie
@@ -104,50 +67,16 @@ export default function PieChartComponent({ data }) {
         <CustomPieLegend />
       </div>
 
-      {/* Summary below pie */}
-      <div
-        style={{
-          marginTop: 18,
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-        }}
-      >
+      <div className="pie-summary-bars">
         {data.map(({ name, value, color }) => (
-          <div
-            key={name}
-            style={{ display: "flex", alignItems: "center", gap: 10 }}
-          >
-            <div
-              style={{
-                flex: 1,
-                height: 6,
-                borderRadius: 3,
-                background: "#f1f5f9",
-                overflow: "hidden",
-              }}
-            >
+          <div key={name} className="pie-summary-item">
+            <div className="pie-summary-track">
               <div
-                style={{
-                  width: `${value}%`,
-                  height: "100%",
-                  background: color,
-                  borderRadius: 3,
-                  transition: "width 0.8s ease",
-                }}
+                className="pie-summary-fill"
+                style={{ width: `${value}%`, background: color }}
               />
             </div>
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#64748b",
-                minWidth: 32,
-                textAlign: "right",
-              }}
-            >
-              {value}%
-            </span>
+            <span className="pie-summary-percent">{value}%</span>
           </div>
         ))}
       </div>

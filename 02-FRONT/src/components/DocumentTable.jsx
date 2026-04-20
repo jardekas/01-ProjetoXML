@@ -6,7 +6,6 @@ import {
   STATUS_STYLE,
   formatCurrency,
 } from "../services/documentServices";
-import { abrirDanfe } from "../utils/danfeUtils";
 
 const SortIcon = ({ col, sortCol, sortDir }) => (
   <svg
@@ -43,8 +42,6 @@ function DocumentTable({
   sortDir,
   onSort,
   user,
-  verTodos,
-  setVerTodos,
   onRefresh,
 }) {
   const [hoverRow, setHoverRow] = useState(null);
@@ -56,13 +53,10 @@ function DocumentTable({
       const response = await api.get(`/document/visualizar/${doc.id}`);
       const xml = response.data.xml;
 
-      // Chama o backend para gerar o PDF
       const pdfResponse = await api.post(
         "/api/danfe/gerar",
         { xml },
-        {
-          responseType: "blob",
-        },
+        { responseType: "blob" },
       );
 
       const url = window.URL.createObjectURL(
@@ -97,9 +91,7 @@ function DocumentTable({
         `/document/${cnpjParaDownload}/download?id=${ids}`,
         {
           responseType: "blob",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -125,9 +117,7 @@ function DocumentTable({
         `/document/${cnpjParaDownload}/download?id=${docId}`,
         {
           responseType: "blob",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -146,84 +136,22 @@ function DocumentTable({
   };
 
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: 14,
-        border: "1px solid #e2e8f0",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-        overflow: "hidden",
-      }}
-    >
+    <div className="doc-table-wrapper">
       {/* Cabeçalho da tabela */}
-      <div
-        style={{
-          padding: "18px 24px 16px",
-          borderBottom: "1px solid #f1f5f9",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>
-            Documentos Encontrados
-          </span>
-          <span
-            style={{
-              background: "#eff6ff",
-              color: "#1d4ed8",
-              fontSize: 12,
-              fontWeight: 700,
-              borderRadius: 20,
-              padding: "2px 10px",
-            }}
-          >
-            {documentos.length}
-          </span>
-        </div>
-        <div>
-          <label className="remember-label-simple">
-            <input
-              type="checkbox"
-              checked={verTodos}
-              onChange={(e) => setVerTodos(e.target.checked)}
-              className="native-checkbox"
-            />
-            <span style={{ color: "#0f172a" }}>Todos os documentos</span>
-          </label>
+      <div className="doc-table-header">
+        <div className="doc-table-title">
+          <span>Documentos Encontrados</span>
+          <span className="doc-table-badge">{documentos.length}</span>
         </div>
 
         {selected.length > 0 && (
-          <div
-            style={{
-              background: "#1e293b",
-              color: "white",
-              borderRadius: 12,
-              padding: "12px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              animation: "slideIn 0.25s ease",
-            }}
-          >
-            <span style={{ fontSize: 13, fontWeight: 500 }}>
+          <div className="doc-table-selected-bar">
+            <span className="doc-table-selected-text">
               {selected.length} selecionado{selected.length > 1 ? "s" : ""}
             </span>
             <button
               onClick={handleDownloadSelecionados}
-              style={{
-                background: "rgba(255,255,255,0.12)",
-                border: "none",
-                color: "white",
-                borderRadius: 7,
-                padding: "6px 12px",
-                fontSize: 12.5,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
+              className="doc-table-download-btn"
             >
               <svg
                 width="13"
@@ -244,23 +172,18 @@ function DocumentTable({
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="doc-table">
           <thead>
-            <tr style={{ background: "#f8fafc" }}>
-              <th style={{ padding: "12px 16px 12px 24px", width: 44 }}>
+            <tr>
+              <th>
                 <input
                   type="checkbox"
+                  className="doc-table-checkbox"
                   checked={
                     selected.length === documentos.length &&
                     documentos.length > 0
                   }
                   onChange={onToggleAll}
-                  style={{
-                    width: 16,
-                    height: 16,
-                    accentColor: "#1d4ed8",
-                    cursor: "pointer",
-                  }}
                 />
               </th>
               {[
@@ -274,48 +197,18 @@ function DocumentTable({
               ].map(({ label, col }) => (
                 <th
                   key={col}
-                  style={{
-                    padding: "12px 16px",
-                    textAlign: col === "numero" ? "center" : "left",
-                  }}
+                  data-align={col === "numero" ? "center" : undefined}
                 >
                   <button
                     onClick={() => onSort(col)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      fontSize: 12.5,
-                      fontWeight: 600,
-                      color: "#64748b",
-                      padding: 0,
-                      letterSpacing: "0.04em",
-                      textTransform: "uppercase",
-                    }}
+                    className="doc-table-sort-btn"
                   >
                     {label}{" "}
                     <SortIcon col={col} sortCol={sortCol} sortDir={sortDir} />
                   </button>
                 </th>
               ))}
-              <th
-                style={{ padding: "12px 24px 12px 16px", textAlign: "right" }}
-              >
-                <span
-                  style={{
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    color: "#64748b",
-                    letterSpacing: "0.04em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Ações
-                </span>
-              </th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -333,134 +226,63 @@ function DocumentTable({
                   key={doc.id}
                   onMouseEnter={() => setHoverRow(doc.id)}
                   onMouseLeave={() => setHoverRow(null)}
-                  style={{
-                    borderTop: "1px solid #f1f5f9",
-                    background: isSelected
-                      ? "#eff6ff"
-                      : isHover
-                        ? "#fafbfc"
-                        : "white",
-                    transition: "background 0.15s",
-                  }}
+                  className={`${isSelected ? "row-selected" : ""} ${
+                    isHover ? "row-hover" : ""
+                  }`}
                 >
-                  <td style={{ padding: "14px 16px 14px 24px" }}>
+                  <td>
                     <input
                       type="checkbox"
+                      className="doc-table-checkbox"
                       checked={isSelected}
                       onChange={() => onToggleSelect(doc.id)}
-                      style={{
-                        width: 16,
-                        height: 16,
-                        accentColor: "#1d4ed8",
-                        cursor: "pointer",
-                      }}
                     />
                   </td>
-                  <td style={{ padding: "14px 5px" }}>
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 8 }}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={sc.dot}
-                        strokeWidth="2.5"
-                      >
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                      </svg>
-                      <span
-                        style={{
-                          background: tc.bg,
-                          color: tc.text,
-                          fontSize: 11,
-                          borderRadius: 6,
-                          padding: "3px 8px",
-                          fontFamily: "'JetBrains Mono', monospace",
-                        }}
-                      >
-                        {doc.tipo}
-                      </span>
-                      <span style={{ fontSize: 13, color: "#0f172a" }}>
-                        {(doc.chave || "").length > 22
-                          ? doc.chave.slice(0, 22) + "..."
-                          : doc.chave}
-                      </span>
+                  <td>
+                    <div className="doc-table-chave-cell">
+                      <div className="doc-table-chave-header">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke={sc.dot}
+                          strokeWidth="2.5"
+                        >
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                          <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                        <span
+                          className="doc-type-badge"
+                          style={{ background: tc.bg, color: tc.text }}
+                        >
+                          {doc.tipo}
+                        </span>
+                      </div>
+                      <span className="doc-table-chave-text">{doc.chave}</span>
                     </div>
                   </td>
-                  <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                    <span style={{ fontSize: 16, color: "#0f172a" }}>
-                      {doc.numero}
-                    </span>
+                  <td className="doc-table-numero-cell">{doc.numero}</td>
+                  <td className="doc-table-mono">{doc.cliente}</td>
+                  <td className="doc-table-mono">{doc.clienteCNPJ || "—"}</td>
+                  <td className="doc-table-mono">{doc.data}</td>
+                  <td className="doc-table-mono">
+                    {formatCurrency(doc.valor)}
                   </td>
-                  <td style={{ padding: "14px 16px" }}>
-                    <span style={{ fontSize: 13, color: "#475569" }}>
-                      {doc.cliente}
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 16px" }}>
+                  <td>
                     <span
-                      style={{
-                        fontSize: 13,
-                        color: "#475569",
-                        fontFamily: "'JetBrains Mono', monospace",
-                      }}
-                    >
-                      {doc.clienteCNPJ || "—"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 16px" }}>
-                    <span
-                      style={{
-                        fontSize: 13,
-                        color: "#475569",
-                        fontFamily: "'JetBrains Mono', monospace",
-                      }}
-                    >
-                      {doc.data}
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 16px" }}>
-                    <span
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 400,
-                        color: "#0f172a",
-                        fontFamily: "'JetBrains Mono', monospace",
-                      }}
-                    >
-                      {formatCurrency(doc.valor)}
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 16px" }}>
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        background: sc.bg,
-                        color: sc.text,
-                        fontSize: 12.5,
-                        borderRadius: 20,
-                        padding: "4px 12px",
-                      }}
+                      className="doc-status-badge"
+                      style={{ background: sc.bg, color: sc.text }}
                     >
                       <span
-                        style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          background: sc.dot,
-                          display: "inline-block",
-                        }}
+                        className="doc-status-dot"
+                        style={{ background: sc.dot }}
                       />
                       {doc.status}
                     </span>
                   </td>
-                  <td style={{ padding: "14px 24px 14px 16px" }}>
-                    <div style={{ display: "flex", gap: 5 }}>
+                  <td>
+                    <div className="doc-table-actions">
                       <button
                         className="action-btn"
                         title="Visualizar DANFE"
@@ -504,14 +326,7 @@ function DocumentTable({
             })}
             {documentos.length === 0 && (
               <tr>
-                <td
-                  colSpan={9}
-                  style={{
-                    padding: "48px 24px",
-                    textAlign: "center",
-                    color: "#94a3b8",
-                  }}
-                >
+                <td colSpan={9} className="doc-table-empty">
                   <svg
                     width="36"
                     height="36"
@@ -519,15 +334,14 @@ function DocumentTable({
                     fill="none"
                     stroke="#cbd5e1"
                     strokeWidth="1.5"
-                    style={{ display: "block", margin: "0 auto 12px" }}
                   >
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
-                  <div style={{ fontSize: 14, fontWeight: 500 }}>
+                  <div className="doc-table-empty-title">
                     Nenhum documento encontrado
                   </div>
-                  <div style={{ fontSize: 13, marginTop: 4 }}>
+                  <div className="doc-table-empty-sub">
                     Tente ajustar os filtros
                   </div>
                 </td>
@@ -537,34 +351,12 @@ function DocumentTable({
         </table>
       </div>
 
-      <div
-        style={{
-          padding: "14px 24px",
-          borderTop: "1px solid #f1f5f9",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span style={{ fontSize: 13, color: "#64748b" }}>
+      <div className="doc-table-footer">
+        <span className="doc-table-footer-info">
           Exibindo <strong>{documentos.length}</strong> documentos
         </span>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              border: "none",
-              background: "#1d4ed8",
-              color: "white",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            1
-          </button>
+        <div className="doc-table-footer-pagination">
+          <button className="doc-table-page-btn">1</button>
         </div>
       </div>
     </div>
@@ -580,8 +372,6 @@ DocumentTable.propTypes = {
   sortDir: PropTypes.string,
   onSort: PropTypes.func.isRequired,
   user: PropTypes.object.isRequired,
-  verTodos: PropTypes.bool.isRequired,
-  setVerTodos: PropTypes.func.isRequired,
   onRefresh: PropTypes.func.isRequired,
 };
 

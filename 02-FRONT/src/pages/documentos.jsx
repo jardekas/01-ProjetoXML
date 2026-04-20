@@ -12,7 +12,7 @@ import "../styles/documentos.css";
 export default function Documentos() {
   const { user } = useAuth();
 
-  const [verTodos, setVerTodos] = useState(false);
+  /*const [verTodos, setVerTodos] = useState(false);*/
   const [allDocs, setAllDocs] = useState([]);
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,6 @@ export default function Documentos() {
 
   const userType = user?.flg_conta || user?.flg_master ? "contador" : "empresa";
 
-  // Período baseado nos documentos filtrados (para o relatório)
   const periodoInicio = useMemo(() => {
     if (!documentos.length) return "—";
     const datas = documentos
@@ -63,7 +62,7 @@ export default function Documentos() {
   }, [allDocs]);
 
   const loadDocumentos = useCallback(() => {
-    if (!user?.EMPcpfCNPJ) return;
+    if (!user) return;
 
     setLoading(true);
     setErro("");
@@ -112,13 +111,15 @@ export default function Documentos() {
       tipo: mapModelo(doc.modelo),
     });
 
-    const params = new URLSearchParams({ todos: verTodos });
-    if (user.flg_conta && user.idContador) {
+    const params = new URLSearchParams();
+    if (user.flg_master) {
+      params.append("master", "true");
+    } else if (user.flg_conta && user.idContador) {
       params.append("contadorId", user.idContador);
     } else {
       params.append("cnpj", user.EMPcpfCNPJ);
     }
-
+    params.append("todos", "true");
     api
       .get(`/document?${params.toString()}`)
       .then((response) => {
@@ -129,13 +130,12 @@ export default function Documentos() {
       })
       .catch(() => setErro("Erro ao carregar documentos"))
       .finally(() => setLoading(false));
-  }, [user, verTodos]);
+  }, [user /*, verTodos*/]);
 
   useEffect(() => {
     loadDocumentos();
   }, [loadDocumentos]);
 
-  // Filtros locais (incluindo período)
   useEffect(() => {
     const filtrados = allDocs.filter((doc) => {
       if (busca && !doc.chave?.includes(busca)) return false;
@@ -148,16 +148,14 @@ export default function Documentos() {
       if (tipoFiltro !== "Todos" && doc.tipo !== tipoFiltro) return false;
       if (statusFiltro !== "Todos" && doc.status !== statusFiltro) return false;
 
-      // Filtro de período
       if (periodoFiltro) {
         const [dia, mes, ano] = doc.data.split("/");
         if (!dia || !mes || !ano) return false;
-        const docMes = parseInt(mes, 10) - 1; // 0-11
+        const docMes = parseInt(mes, 10) - 1;
         const docAno = parseInt(ano, 10);
         if (docMes !== periodoFiltro.mes || docAno !== periodoFiltro.ano)
           return false;
       }
-
       return true;
     });
     setDocumentos(filtrados);
@@ -171,12 +169,10 @@ export default function Documentos() {
     periodoFiltro,
   ]);
 
-  // Stats (baseadas em allDocs, não nos filtrados)
   const total = allDocs.length;
   const autorizadas = allDocs.filter((d) => d.status === "Autorizada").length;
   const problemas = allDocs.filter((d) => d.status === "Com Problema").length;
 
-  // Período exibido no card (filtrado ou mais recente)
   const periodoExibicao = useMemo(() => {
     if (periodoFiltro) {
       const data = new Date(periodoFiltro.ano, periodoFiltro.mes);
@@ -232,41 +228,15 @@ export default function Documentos() {
 
   return (
     <div className="documentos-container">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-        * { box-sizing: border-box; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes slideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
-        @keyframes modalIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
-      `}</style>
-
-      <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: 28,
-            animation: "fadeIn 0.4s ease",
-          }}
-        >
+      <main className="documentos-main">
+        <div className="documentos-header">
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 28,
-                fontWeight: 700,
-                letterSpacing: "-0.03em",
-                color: "#0f172a",
-              }}
-            >
-              Documentos
-            </h1>
-            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            <h1 className="documentos-header-title">Documentos</h1>
+            <p className="documentos-header-subtitle">
               Gerencie XMLs e documentos fiscais
             </p>
           </div>
-          <div style={{ display: "flex", gap: 12 }}>
+          <div className="documentos-actions">
             <button
               className="impress-btn"
               onClick={() => setImpressModal(true)}
@@ -285,7 +255,6 @@ export default function Documentos() {
               </svg>
               Relatório
             </button>
-
             <button className="import-btn" onClick={() => setImportModal(true)}>
               <svg
                 width="16"
@@ -304,30 +273,9 @@ export default function Documentos() {
           </div>
         </div>
 
-        {erro && (
-          <div
-            style={{
-              color: "#dc2626",
-              fontSize: 13,
-              padding: "8px 12px",
-              background: "#fef2f2",
-              borderRadius: 8,
-              marginBottom: 16,
-            }}
-          >
-            {erro}
-          </div>
-        )}
+        {erro && <div className="documentos-error">{erro}</div>}
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
-            gap: 16,
-            marginBottom: 24,
-            animation: "fadeIn 0.4s ease 0.05s both",
-          }}
-        >
+        <div className="documentos-stats-grid">
           <StatsCard
             icon={
               <svg
@@ -408,9 +356,7 @@ export default function Documentos() {
         </div>
 
         {loading ? (
-          <div style={{ padding: 48, textAlign: "center", color: "#94a3b8" }}>
-            Carregando documentos...
-          </div>
+          <div className="documentos-loading">Carregando documentos...</div>
         ) : (
           <>
             <FilterBar
@@ -437,8 +383,8 @@ export default function Documentos() {
               sortDir={sortDir}
               onSort={handleSort}
               user={user}
-              verTodos={verTodos}
-              setVerTodos={setVerTodos}
+              /*verTodos={verTodos}
+              setVerTodos={setVerTodos}*/
               onRefresh={loadDocumentos}
             />
           </>

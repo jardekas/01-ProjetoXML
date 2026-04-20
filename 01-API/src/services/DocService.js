@@ -146,22 +146,55 @@ export const getDocByCnpjService = async (
   cnpj,
   todos = false,
   contadorId = null,
+  flg_master = false,
 ) => {
-  // Se for contador, busca todos os CNPJs vinculados
+  // Master: acesso total
+  if (flg_master) {
+    return await prisma.document.findMany({
+      orderBy: { data: "desc" },
+    });
+  }
+
+  // Contador: apenas CNPJs vinculados
   if (contadorId) {
     const vinculos = await prisma.contador_empresa.findMany({
       where: { contadorId: Number(contadorId) },
     });
     const cnpjs = vinculos.map((v) => v.cnpj);
     if (!cnpjs.length) return [];
-
     return await prisma.document.findMany({
-      where: {
-        EMPcpfCNPJ: { in: cnpjs },
-        ...(todos ? {} : { baixado: false }),
-      },
+      where: { EMPcpfCNPJ: { in: cnpjs } },
+      orderBy: { data: "desc" },
     });
   }
 
+  // Empresa: próprio CNPJ
   return await DocModel.findByCnpj(cnpj, todos);
+};
+
+export const getEmpresasDistintasService = async (
+  contadorId = null,
+  flg_master = false,
+) => {
+  if (flg_master) {
+    return await prisma.document.findMany({
+      distinct: ["EMPcpfCNPJ"],
+      select: { EMPcpfCNPJ: true, nomeEmp: true },
+      orderBy: { nomeEmp: "asc" },
+    });
+  }
+  if (contadorId) {
+    const vinculos = await prisma.contador_empresa.findMany({
+      where: { contadorId: Number(contadorId) },
+    });
+    const cnpjs = vinculos.map((v) => v.cnpj);
+    if (!cnpjs.length) return [];
+    return await prisma.document.findMany({
+      where: { EMPcpfCNPJ: { in: cnpjs } },
+      distinct: ["EMPcpfCNPJ"],
+      select: { EMPcpfCNPJ: true, nomeEmp: true },
+      orderBy: { nomeEmp: "asc" },
+    });
+  }
+  return [];
 };

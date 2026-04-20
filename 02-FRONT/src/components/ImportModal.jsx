@@ -5,7 +5,7 @@ import api from "../services/api";
 export default function ImportModal({ isOpen, onClose }) {
   const [arquivos, setArquivos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [resultado, setResultado] = useState(null); // { sucesso, erro }
+  const [resultado, setResultado] = useState(null);
   const inputRef = useRef(null);
 
   if (!isOpen) return null;
@@ -61,65 +61,20 @@ export default function ImportModal({ isOpen, onClose }) {
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.45)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 100,
-        backdropFilter: "blur(4px)",
-      }}
-      onClick={handleClose}
-    >
+    <div className="modal-overlay" onClick={handleClose}>
       <div
-        style={{
-          background: "white",
-          borderRadius: 18,
-          padding: "32px",
-          width: 460,
-          boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
-          animation: "modalIn 0.2s ease",
-        }}
+        className="modal-container"
+        style={{ width: 460 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 20,
-          }}
-        >
+        <div className="modal-header">
           <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Importar XMLs
-            </h2>
-            <p style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b" }}>
+            <h2 className="modal-title">Importar XMLs</h2>
+            <p className="modal-desc">
               Arraste ou selecione arquivos XML fiscais
             </p>
           </div>
-          <button
-            onClick={handleClose}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 7,
-              borderRadius: 8,
-              color: "#64748b",
-            }}
-          >
+          <button className="modal-close-btn" onClick={handleClose}>
             <svg
               width="18"
               height="18"
@@ -143,33 +98,13 @@ export default function ImportModal({ isOpen, onClose }) {
           onChange={(e) => handleFiles(e.target.files)}
         />
 
-        {/* Drop Area */}
         <div
+          className="import-dropzone"
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
           onClick={() => inputRef.current?.click()}
-          style={{
-            border: "2px dashed #e2e8f0",
-            borderRadius: 14,
-            padding: "40px 24px",
-            textAlign: "center",
-            background: "#f8fafc",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
         >
-          <div
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 14,
-              background: "#eff6ff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 14px",
-            }}
-          >
+          <div className="import-dropzone-icon">
             <svg
               width="24"
               height="24"
@@ -183,50 +118,21 @@ export default function ImportModal({ isOpen, onClose }) {
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
           </div>
-          <p
-            style={{
-              margin: 0,
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#0f172a",
-            }}
-          >
+          <p className="upload-title">
             {arquivos.length > 0
               ? `${arquivos.length} arquivo(s) selecionado(s)`
               : "Arraste arquivos aqui"}
           </p>
-          <p style={{ margin: "6px 0 14px", fontSize: 13, color: "#64748b" }}>
+          <p className="upload-hint">
             ou clique para selecionar — NFe, NFCe, CTe, NFSe...
           </p>
-          <span
-            style={{
-              background: "#eff6ff",
-              color: "#1d4ed8",
-              fontSize: 12.5,
-              fontWeight: 600,
-              borderRadius: 7,
-              padding: "6px 14px",
-            }}
-          >
-            Selecionar arquivos
-          </span>
+          <span className="upload-select-btn">Selecionar arquivos</span>
         </div>
 
-        {/* Lista de arquivos */}
         {arquivos.length > 0 && (
-          <div style={{ marginTop: 12, maxHeight: 100, overflowY: "auto" }}>
+          <div className="import-file-list">
             {arquivos.map((f, i) => (
-              <div
-                key={i}
-                style={{
-                  fontSize: 12,
-                  color: "#475569",
-                  padding: "3px 0",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
+              <div key={i} className="import-file-item">
                 <svg
                   width="12"
                   height="12"
@@ -244,76 +150,30 @@ export default function ImportModal({ isOpen, onClose }) {
           </div>
         )}
 
-        {/* Resultado */}
         {resultado && (
           <div style={{ marginTop: 12 }}>
             {resultado.sucesso > 0 && (
-              <div
-                style={{
-                  color: "#15803d",
-                  fontSize: 13,
-                  padding: "6px 10px",
-                  background: "#dcfce7",
-                  borderRadius: 8,
-                  marginBottom: 6,
-                }}
-              >
+              <div className="import-result-success">
                 ✓ {resultado.sucesso} arquivo(s) importado(s) com sucesso
               </div>
             )}
             {resultado.erro.map((e, i) => (
-              <div
-                key={i}
-                style={{
-                  color: "#b91c1c",
-                  fontSize: 12,
-                  padding: "4px 10px",
-                  background: "#fee2e2",
-                  borderRadius: 8,
-                  marginBottom: 4,
-                }}
-              >
+              <div key={i} className="import-result-error">
                 ✗ {e.nome}: {e.msg}
               </div>
             ))}
           </div>
         )}
 
-        {/* Botões */}
-        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-          <button
-            onClick={handleClose}
-            style={{
-              flex: 1,
-              padding: "12px",
-              background: "white",
-              border: "1.5px solid #e2e8f0",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-              color: "#475569",
-            }}
-          >
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={handleClose}>
             Cancelar
           </button>
           <button
+            className="btn-primary"
             onClick={handleImportar}
             disabled={loading || arquivos.length === 0}
-            style={{
-              flex: 2,
-              padding: "12px",
-              background:
-                loading || arquivos.length === 0
-                  ? "#93c5fd"
-                  : "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-              border: "none",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: arquivos.length === 0 ? "not-allowed" : "pointer",
-              color: "white",
-            }}
+            style={{ flex: 2 }}
           >
             {loading
               ? "Importando..."

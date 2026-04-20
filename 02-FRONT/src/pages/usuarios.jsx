@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import api from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import StatsCard from "../components/StatsCard";
@@ -6,10 +6,10 @@ import UserTable from "../components/UserTable";
 import UserModal from "../components/CriarUserModal";
 import AdcContadorModal from "../components/AdcContadorModal";
 import { userService } from "../services/userService";
-import { USERS_MOCK, getStats, EMPTY_USER } from "../services/usuariosService"; // Importa os dados mockados e a função de estatísticas
+import { USERS_MOCK, EMPTY_USER } from "../services/usuariosService"; // Importa os dados mockados e a função de estatísticas
 import "../styles/usuarios.css";
 
-const mapBackToFront = (user) => ({
+/*const mapBackToFront = (user) => ({
   id: user.id,
   nome: user.nome,
   email: user.email,
@@ -19,7 +19,7 @@ const mapBackToFront = (user) => ({
   tipo: user.tipo,
   idContador: user.idContador,
   ativo: user.ativo,
-});
+});*/
 
 export default function Usuarios() {
   const { user } = useAuth();
@@ -69,7 +69,13 @@ export default function Usuarios() {
       u.cpf?.includes(search),
   );
 
-  const stats = getStats(users);
+  const stats = useMemo(() => {
+    const total = users.length;
+    const ativos = users.filter((u) => u.ativo === true).length;
+    const inativos = users.filter((u) => u.ativo === false).length;
+    const admins = users.filter((u) => u.flg_admin === true).length;
+    return { total, ativos, inativos, admins };
+  }, [users]);
 
   const openNew = () => {
     let tipoDefault = "Empresa";
@@ -94,6 +100,11 @@ export default function Usuarios() {
   };
 
   const openDelete = (id, isContador = false) => {
+    if (id === user?.id) {
+      alert("Você não pode excluir seu próprio usuário.");
+      return;
+    }
+
     setDeleteId(id);
     setIsContadorDelete(isContador);
     setModal("delete");
@@ -418,6 +429,7 @@ export default function Usuarios() {
             </div>
           ) : (
             <UserTable
+              currentUserId={user?.id}
               users={filtered}
               hoverRow={hoverRow}
               setHoverRow={setHoverRow}

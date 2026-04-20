@@ -160,3 +160,233 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
+
+/* ===== CADASTRO PAGE ===== */
+.cadastro-main {
+  flex: 1;
+  padding: 32px 36px;
+  overflow-y: auto;
+}
+
+.cadastro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.cadastro-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cadastro-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cadastro-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.cadastro-subtitle {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.cadastro-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  padding: 32px;
+  max-width: 680px;
+  animation: fadeIn 0.4s ease;
+}
+
+.cadastro-card-title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cadastro-card-desc {
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.cadastro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cadastro-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cadastro-error {
+  color: #dc2626;
+  font-size: 13px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+.cadastro-success {
+  color: #15803d;
+  font-size: 13px;
+  padding: 10px 14px;
+  background: #dcfce7;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+}
+
+.cadastro-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cadastro-submit {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+}
+.select-wrapper {
+  position: relative;
+}
+.select-wrapper svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* ========== USER TABLE ========== */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table thead tr {
+  background: #f8fafc;
+}
+[data-theme="dark"] .user-table thead tr {
+  background: #1e293b;
+}
+
+.user-table th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+[data-theme="dark"] .user-table th {
+  color: #94a3b8;
+}
+
+.user-table td {
+  padding: 14px 20px;
+  border-top: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+[data-theme="dark"] .user-table td {
+  border-top-color: #334155;
+}
+
+.user-table tr {
+  background: white;
+}
+[data-theme="dark"] .user-table tr {
+  background: #1e293b;
+}
+
+.user-table tr.user-row-hover {
+  background: #fafbfc;
+}
+[data-theme="dark"] .user-table tr.user-row-hover {
+  background: #2d3a4f;
+}
+
+.user-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+}
+[data-theme="dark"] .user-name {
+  color: #f8fafc;
+}
+
+.user-cell-mono {
+  font-size: 13.5px;
+  color: #64748b;
+  font-family: "JetBrains Mono", monospace;
+}
+[data-theme="dark"] .user-cell-mono {
+  color: #94a3b8;
+}
+
+.user-cell-email {
+  font-size: 13.5px;
+  color: #475569;
+}
+[data-theme="dark"] .user-cell-email {
+  color: #cbd5e1;
+}
+
+.user-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+.user-actions {
+  display: flex;
+  gap: 2px;
+  justify-content: flex-end;
+}
+
+.user-empty-state {
+  padding: 48px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.user-empty-icon {
+  display: block;
+  margin: 0 auto 12px;
+}

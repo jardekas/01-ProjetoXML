@@ -21,14 +21,12 @@ export default function ImpressModal({
     userType,
   );
 
-  // Reinicia o estado quando o modal abre
   useEffect(() => {
     if (isOpen) {
       setIframeReady(false);
     }
   }, [isOpen]);
 
-  // Injeta HTML no iframe assim que ele estiver disponível
   useEffect(() => {
     if (isOpen && iframeRef.current) {
       const iframe = iframeRef.current;
@@ -41,7 +39,6 @@ export default function ImpressModal({
       iframeDoc.write(html);
       iframeDoc.close();
 
-      // Se já estiver carregado, marca como pronto
       if (iframeDoc.readyState === "complete") {
         setIframeReady(true);
       }
@@ -61,7 +58,6 @@ export default function ImpressModal({
     const iframe = iframeRef.current;
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-    // Aguarda um ciclo para garantir renderização completa
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const script = document.createElement("script");
@@ -110,100 +106,37 @@ export default function ImpressModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        backdropFilter: "blur(4px)",
-      }}
-      onClick={onClose}
-    >
+    <div className="modal-overlay" onClick={onClose}>
       <div
-        style={{
-          background: "white",
-          borderRadius: 16,
-          padding: 24,
-          width: "90%",
-          maxWidth: 1000,
-          maxHeight: "90vh",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-          animation: "modalIn 0.2s ease",
-        }}
+        className="modal-container modal-container--impress"
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ marginBottom: 16, textAlign: "center" }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-            Gerar Relatório PDF
-          </h2>
-          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
-            {documentos.length} documento{documentos.length !== 1 ? "s" : ""} ·{" "}
-            {periodoInicio} até {periodoFim}
-          </p>
+        <div className="modal-header modal-header--impress">
+          <div style={{ width: "100%" }}>
+            <h2 className="modal-title">Gerar Relatório PDF</h2>
+            <p className="modal-desc">
+              {documentos.length} documento{documentos.length !== 1 ? "s" : ""}{" "}
+              · {periodoInicio} até {periodoFim}
+            </p>
+          </div>
         </div>
 
-        <div
-          style={{
-            flex: 1,
-            overflow: "auto",
-            border: "1px solid #e2e8f0",
-            borderRadius: 8,
-            backgroundColor: "#f8fafc",
-            marginBottom: 16,
-          }}
-        >
+        <div className="impress-preview-container">
           <iframe
             ref={iframeRef}
             title="preview"
-            style={{
-              width: "100%",
-              height: "100%",
-              minHeight: 350,
-              border: "none",
-              backgroundColor: "white",
-            }}
+            className="impress-preview-iframe"
           />
         </div>
 
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button
-            onClick={onClose}
-            disabled={gerando}
-            style={{
-              padding: "10px 20px",
-              background: "white",
-              border: "1.5px solid #e2e8f0",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-              color: "#475569",
-            }}
-          >
+        <div className="modal-actions modal-actions--end">
+          <button className="btn-cancel" onClick={onClose} disabled={gerando}>
             Cancelar
           </button>
           <button
+            className="btn-primary btn-primary--small"
             onClick={handleGerarPDF}
             disabled={gerando || !iframeReady}
-            style={{
-              padding: "10px 20px",
-              background:
-                gerando || !iframeReady
-                  ? "#93c5fd"
-                  : "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-              border: "none",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: gerando || !iframeReady ? "not-allowed" : "pointer",
-              color: "white",
-            }}
           >
             {gerando ? "Gerando PDF..." : "Baixar PDF"}
           </button>

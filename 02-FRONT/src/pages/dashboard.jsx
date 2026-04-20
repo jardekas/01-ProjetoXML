@@ -60,17 +60,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container" onClick={() => setOpenSelect(null)}>
-      <main
-        style={{
-          flex: 1,
-          padding: "32px 36px",
-          overflowY: "auto",
-          zIndex: 100,
-          minWidth: 0,
-        }}
-      >
-        {/* Header igual */}
-
+      <main className="dashboard-main">
         <FilterBar
           dataInicio={dataInicio}
           setDataInicio={setDataInicio}
@@ -91,33 +81,16 @@ export default function Dashboard() {
           onClearFilters={handleClearFilters}
         />
 
-        {/* KPI Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
-            gap: 16,
-            marginBottom: 22,
-          }}
-        >
+        <div className="kpi-grid">
           {kpiData.map((kpi, i) => (
             <KPICard key={kpi.label} {...kpi} delay={0.1 + i * 0.05} />
           ))}
         </div>
 
-        {/* Charts */}
         {loading ? (
-          <div style={{ padding: 48, textAlign: "center", color: "#94a3b8" }}>
-            Carregando gráficos...
-          </div>
+          <div className="loading-placeholder">Carregando gráficos...</div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1.3fr 1fr",
-              gap: 20,
-            }}
-          >
+          <div className="charts-grid">
             <BarChartComponent data={barData} legendItems={LEGEND_ITEMS} />
             <PieChartComponent data={pieData} />
           </div>

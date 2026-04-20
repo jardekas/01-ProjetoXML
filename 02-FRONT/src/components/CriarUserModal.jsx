@@ -19,6 +19,7 @@ export default function UserModal({
     ...(podecriarContador ? ["Contador"] : []),
     ...(podecriarMaster ? ["Master"] : []),
   ];
+
   const handleFormChange = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
   };
@@ -45,62 +46,66 @@ export default function UserModal({
 
   const { title, desc } = getModalTitle();
 
+  const formFields = [
+    {
+      label: "Nome completo*",
+      key: "nome",
+      placeholder: "Ex: Maria Santos",
+      mask: null,
+    },
+    { label: "CPF*", key: "cpf", placeholder: "000.000.000-00", mask: maskCPF },
+    {
+      label: "CNPJ*",
+      key: "cnpj",
+      placeholder: "00.000.000/0000-00",
+      mask: maskCNPJ,
+    },
+    {
+      label: "E-mail*",
+      key: "email",
+      placeholder: "usuario@empresa.com",
+      mask: null,
+    },
+    {
+      label: "Telefone",
+      key: "telefone",
+      placeholder: "(00) 00000-0000",
+      mask: maskPhone,
+    },
+    ...(form.tipo === "Contador"
+      ? [{ label: "CRC", key: "crc", placeholder: "0SP000000/O-0", mask: null }]
+      : []),
+    {
+      label: "Senha*",
+      key: "senha",
+      placeholder: "Mínimo 6 caracteres",
+      mask: null,
+      type: "password",
+    },
+    {
+      label: "Confirmar Senha*",
+      key: "confirmarSenha",
+      placeholder: "Repita a senha",
+      mask: null,
+      type: "password",
+    },
+  ];
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 100,
-        backdropFilter: "blur(4px)",
-      }}
-      onClick={onClose}
-    >
+    <div className="modal-overlay" onClick={onClose}>
       <div
-        style={{
-          background: "white",
-          borderRadius: 18,
-          padding: "32px",
-          width: modal === "delete" ? 420 : 500,
-          maxHeight: "90vh",
-          overflowY: "auto",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
-          animation: "modalIn 0.2s ease",
-        }}
+        className={`modal-container ${modal === "delete" ? "modal-container--delete" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* New / Edit */}
+        {/* NEW / EDIT */}
         {(modal === "new" || modal === "edit") && (
           <>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 24,
-              }}
-            >
+            <div className="modal-header">
               <div>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: 18,
-                    fontWeight: 700,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {title}
-                </h2>
-                <p
-                  style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b" }}
-                >
-                  {desc}
-                </p>
+                <h2 className="modal-title">{title}</h2>
+                <p className="modal-desc">{desc}</p>
               </div>
-              <button onClick={onClose} className="action-btn">
+              <button className="action-btn" onClick={onClose}>
                 <svg
                   width="18"
                   height="18"
@@ -115,77 +120,10 @@ export default function UserModal({
               </button>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {[
-                {
-                  label: "Nome completo*",
-                  key: "nome",
-                  placeholder: "Ex: Maria Santos",
-                  mask: null,
-                },
-                {
-                  label: "CPF*",
-                  key: "cpf",
-                  placeholder: "000.000.000-00",
-                  mask: maskCPF,
-                },
-                {
-                  label: "CNPJ*",
-                  key: "cnpj",
-                  placeholder: "00.000.000/0000-00",
-                  mask: maskCNPJ,
-                },
-                {
-                  label: "E-mail*",
-                  key: "email",
-                  placeholder: "usuario@empresa.com",
-                  mask: null,
-                },
-                {
-                  label: "Telefone",
-                  key: "telefone",
-                  placeholder: "(00) 00000-0000",
-                  mask: maskPhone,
-                },
-                ...(form.tipo === "Contador"
-                  ? [
-                      {
-                        label: "CRC",
-                        key: "crc",
-                        placeholder: "0SP000000/O-0",
-                        mask: null,
-                      },
-                    ]
-                  : []),
-                {
-                  label: "Senha*",
-                  key: "senha",
-                  placeholder: "Mínimo 6 caracteres",
-                  mask: null,
-                  type: "password",
-                },
-                {
-                  label: "Confirmar Senha*",
-                  key: "confirmarSenha",
-                  placeholder: "Repita a senha",
-                  mask: null,
-                  type: "password",
-                },
-              ].map(({ label, key, placeholder, mask, type }) => (
+            <div className="form-group">
+              {formFields.map(({ label, key, placeholder, mask, type }) => (
                 <div key={key}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12.5,
-                      fontWeight: 600,
-                      color: "#64748b",
-                      marginBottom: 7,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {label}
-                  </label>
+                  <label className="form-label">{label}</label>
                   <input
                     className="input-f"
                     type={type || "text"}
@@ -199,43 +137,14 @@ export default function UserModal({
                 </div>
               ))}
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 14,
-                }}
-              >
-                {/* Checkbox Admin */}
+              <div className="grid-2cols">
+                {/* Admin Checkbox */}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12.5,
-                      fontWeight: 600,
-                      color: "#64748b",
-                      marginBottom: 7,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    Permissões especiais
-                  </label>
-                  <div
-                    style={{
-                      background: "#f8fafc",
-                      borderRadius: 9,
-                      padding: "12px 14px",
-                      border: "1.5px solid #e2e8f0",
-                    }}
-                  >
+                  <label className="form-label">Permissões especiais</label>
+                  <div className="checkbox-group">
                     <label
                       className="remember-label-simple"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
+                      style={{ display: "flex", alignItems: "center", gap: 8 }}
                     >
                       <input
                         type="checkbox"
@@ -245,69 +154,44 @@ export default function UserModal({
                         }
                         className="native-checkbox"
                       />
-                      <span style={{ color: "#0f172a", fontSize: 14 }}>
+                      <span
+                        style={{ color: "var(--text-primary)", fontSize: 14 }}
+                      >
                         Administrador
                       </span>
                     </label>
                   </div>
                 </div>
-                {[
-                  {
-                    label: "Tipo",
-                    key: "tipo",
-                    tiposDisponiveis: ["Empresa", "Contador", "Master"].filter(
-                      (t) => tiposDisponiveis.includes(t),
-                    ),
-                  },
-                ].map(({ label, key, tiposDisponiveis }) => (
-                  <div key={key}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: 12.5,
-                        fontWeight: 600,
-                        color: "#64748b",
-                        marginBottom: 7,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
+
+                {/* Tipo */}
+                <div>
+                  <label className="form-label">Tipo</label>
+                  <div className="select-wrapper">
+                    <select
+                      className="select-f"
+                      value={form.tipo}
+                      onChange={(e) => handleFormChange("tipo", e.target.value)}
                     >
-                      {label}
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        className="select-f"
-                        value={form[key]}
-                        onChange={(e) => handleFormChange(key, e.target.value)}
-                      >
-                        {tiposDisponiveis.map((o) => (
-                          <option key={o}>{o}</option>
-                        ))}
-                      </select>
-                      <svg
-                        style={{
-                          position: "absolute",
-                          right: 10,
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                        }}
-                        width="13"
-                        height="13"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#94a3b8"
-                        strokeWidth="2.5"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </div>
+                      {tiposDisponiveis.map((o) => (
+                        <option key={o}>{o}</option>
+                      ))}
+                    </select>
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#94a3b8"
+                      strokeWidth="2.5"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
+            <div className="modal-actions" style={{ marginTop: 24 }}>
               <button
                 className="btn-secondary"
                 style={{ flex: 1 }}
@@ -338,21 +222,12 @@ export default function UserModal({
           </>
         )}
 
-        {/* Delete */}
+        {/* DELETE */}
         {modal === "delete" && (
           <>
             <div style={{ textAlign: "center", marginBottom: 20 }}>
               <div
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  background: isContadorDelete ? "#fef3c7" : "#fee2e2",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 16px",
-                }}
+                className={`delete-icon-box ${isContadorDelete ? "delete-icon-box--warning" : "delete-icon-box--danger"}`}
               >
                 {isContadorDelete ? (
                   <svg
@@ -383,23 +258,16 @@ export default function UserModal({
                   </svg>
                 )}
               </div>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+              <h2 className="delete-title">
                 {isContadorDelete ? "Desvincular Contador" : "Excluir Usuário"}
               </h2>
-              <p
-                style={{
-                  margin: "8px 0 0",
-                  fontSize: 14,
-                  color: "#64748b",
-                  lineHeight: 1.5,
-                }}
-              >
+              <p className="delete-description">
                 {isContadorDelete
                   ? "O contador será desvinculado desta empresa. Ele não será excluído do sistema."
                   : "Esta ação não pode ser desfeita"}
               </p>
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="modal-actions" style={{ marginTop: 0 }}>
               <button
                 className="btn-secondary"
                 style={{ flex: 1 }}
@@ -418,28 +286,15 @@ export default function UserModal({
           </>
         )}
 
-        {/* Permissions */}
+        {/* PERMISSIONS */}
         {modal === "perms" && (
           <>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 22,
-              }}
-            >
+            <div className="modal-header" style={{ marginBottom: 22 }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-                  {title}
-                </h2>
-                <p
-                  style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b" }}
-                >
-                  {desc}
-                </p>
+                <h2 className="modal-title">{title}</h2>
+                <p className="modal-desc">{desc}</p>
               </div>
-              <button onClick={onClose} className="action-btn">
+              <button className="action-btn" onClick={onClose}>
                 <svg
                   width="18"
                   height="18"
@@ -456,65 +311,23 @@ export default function UserModal({
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {PERMISSOES.map(({ id, label, desc }, i) => (
-                <label
-                  key={id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    background: "#f8fafc",
-                    borderRadius: 10,
-                    padding: "14px 16px",
-                    cursor: "pointer",
-                    border: "1px solid #f1f5f9",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: "#0f172a",
-                      }}
-                    >
-                      {label}
-                    </div>
-                    <div
-                      style={{ fontSize: 12.5, color: "#94a3b8", marginTop: 2 }}
-                    >
-                      {desc}
-                    </div>
+                <label key={id} className="perms-item">
+                  <div className="perms-item-left">
+                    <div className="perms-item-title">{label}</div>
+                    <div className="perms-item-desc">{desc}</div>
                   </div>
                   <div
-                    style={{
-                      width: 44,
-                      height: 24,
-                      borderRadius: 12,
-                      background: i < 3 ? "#1d4ed8" : "#e2e8f0",
-                      position: "relative",
-                      flexShrink: 0,
-                      transition: "background 0.2s",
-                    }}
+                    className={`perms-toggle ${i < 3 ? "perms-toggle--active" : ""}`}
                   >
                     <div
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: "50%",
-                        background: "white",
-                        position: "absolute",
-                        top: 3,
-                        left: i < 3 ? 23 : 3,
-                        transition: "left 0.2s",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                      }}
+                      className={`perms-toggle-knob ${i < 3 ? "perms-toggle-knob--active" : "perms-toggle-knob--inactive"}`}
                     />
                   </div>
                 </label>
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
+            <div className="modal-actions" style={{ marginTop: 22 }}>
               <button
                 className="btn-secondary"
                 style={{ flex: 1 }}
