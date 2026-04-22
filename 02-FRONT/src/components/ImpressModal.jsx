@@ -21,12 +21,12 @@ export default function ImpressModal({
     userType,
   );
 
+  // Reset ao abrir
   useEffect(() => {
-    if (isOpen) {
-      setIframeReady(false);
-    }
+    if (isOpen) setIframeReady(false);
   }, [isOpen]);
 
+  // Injeta HTML no iframe
   useEffect(() => {
     if (isOpen && iframeRef.current) {
       const iframe = iframeRef.current;
@@ -35,6 +35,7 @@ export default function ImpressModal({
       iframe.addEventListener("load", handleLoad);
 
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
       iframeDoc.open();
       iframeDoc.write(html);
       iframeDoc.close();
@@ -47,60 +48,20 @@ export default function ImpressModal({
     }
   }, [isOpen, html]);
 
-  const handleGerarPDF = async () => {
-    if (!iframeRef.current || !iframeReady) {
-      alert("Aguarde o carregamento da pré-visualização.");
-      return;
-    }
+  // Impressão nativa (igual preview)
+  const handleGerarPDF = () => {
+    if (!iframeRef.current || !iframeReady) return;
 
     setGerando(true);
 
     const iframe = iframeRef.current;
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    const iframeWindow = iframe.contentWindow;
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    iframeWindow.focus();
+    iframeWindow.print();
 
-    const script = document.createElement("script");
-    script.src =
-      "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-    document.head.appendChild(script);
-
-    script.onload = () => {
-      const nomeArquivo =
-        `relatorio_${periodoInicio}_${periodoFim}.pdf`.replace(/\//g, "-");
-
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: nomeArquivo,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-        pagebreak: { mode: ["css", "legacy"] },
-      };
-
-      window
-        .html2pdf()
-        .set(opt)
-        .from(iframeDoc.body)
-        .save()
-        .then(() => {
-          document.head.removeChild(script);
-          setGerando(false);
-          onClose();
-        })
-        .catch((err) => {
-          console.error("Erro ao gerar PDF:", err);
-          alert("Erro ao gerar PDF.");
-          document.head.removeChild(script);
-          setGerando(false);
-        });
-    };
-
-    script.onerror = () => {
-      alert("Erro ao carregar biblioteca de PDF.");
-      document.head.removeChild(script);
-      setGerando(false);
-    };
+    // pequena espera só pra UX
+    setTimeout(() => setGerando(false), 800);
   };
 
   if (!isOpen) return null;
@@ -115,8 +76,9 @@ export default function ImpressModal({
           <div style={{ width: "100%" }}>
             <h2 className="modal-title">Gerar Relatório PDF</h2>
             <p className="modal-desc">
-              {documentos.length} documento{documentos.length !== 1 ? "s" : ""}{" "}
-              · {periodoInicio} até {periodoFim}
+              {documentos.length} documento
+              {documentos.length !== 1 ? "s" : ""} · {periodoInicio} até{" "}
+              {periodoFim}
             </p>
           </div>
         </div>
@@ -133,12 +95,13 @@ export default function ImpressModal({
           <button className="btn-cancel" onClick={onClose} disabled={gerando}>
             Cancelar
           </button>
+
           <button
             className="btn-primary btn-primary--small"
             onClick={handleGerarPDF}
-            disabled={gerando || !iframeReady}
+            disabled={!iframeReady || gerando}
           >
-            {gerando ? "Gerando PDF..." : "Baixar PDF"}
+            {gerando ? "Abrindo impressão..." : "Imprimir / Salvar PDF"}
           </button>
         </div>
       </div>

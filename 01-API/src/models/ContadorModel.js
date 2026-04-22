@@ -38,4 +38,35 @@ export const ContadorModel = {
       where: { contadorId },
     });
   },
+
+  async getContadoresByCnpj(cnpj) {
+    return await prisma.contador_empresa.findMany({
+      where: { cnpj },
+      select: { contadorId: true },
+    });
+  },
+
+  async syncVinculos(cnpj, contadorIds) {
+    return await prisma.$transaction(async (tx) => {
+      // Remove vínculos que não estão na nova lista
+      await tx.contador_empresa.deleteMany({
+        where: {
+          cnpj,
+          contadorId: { notIn: contadorIds },
+        },
+      });
+      // Adiciona novos vínculos (ignora duplicados)
+      if (contadorIds.length > 0) {
+        const data = contadorIds.map((contadorId) => ({
+          contadorId,
+          cnpj,
+          hashCNPJ: gerarHash(cnpj),
+        }));
+        await tx.contador_empresa.createMany({
+          data,
+          skipDuplicates: true,
+        });
+      }
+    });
+  },
 };

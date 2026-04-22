@@ -32,7 +32,10 @@ export default function Documentos() {
   const [openSelect, setOpenSelect] = useState(null);
 
   const [periodoModalOpen, setPeriodoModalOpen] = useState(false);
-  const [periodoFiltro, setPeriodoFiltro] = useState(null); // { mes, ano }
+  const [periodoFiltro, setPeriodoFiltro] = useState(() => {
+    const hoje = new Date();
+    return { mes: hoje.getMonth(), ano: hoje.getFullYear() };
+  }); // { mes, ano }
 
   const userType = user?.flg_conta || user?.flg_master ? "contador" : "empresa";
 
@@ -67,7 +70,7 @@ export default function Documentos() {
     setLoading(true);
     setErro("");
 
-    const Contador = user?.flg_conta === true;
+    const Contador = user?.flg_conta === true || user?.flg_master === true;
 
     const extrairChave = (caminho) => {
       if (!caminho) return "";

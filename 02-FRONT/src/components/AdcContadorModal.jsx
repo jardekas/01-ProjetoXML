@@ -7,24 +7,22 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
   const [contadores, setContadores] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const [empresaSelecionada, setEmpresaSelecionada] = useState(null);
-  const [contadorSelecionado, setContadorSelecionado] = useState(null);
+  const [checkedContadores, setCheckedContadores] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
+  // Carrega empresas e contadores ao abrir
   useEffect(() => {
     if (!isOpen) return;
 
     setLoading(true);
     setErro("");
-    setContadorSelecionado(null);
     setEmpresaSelecionada(null);
+    setCheckedContadores(new Set());
 
     Promise.all([api.get("/contador/lista"), api.get("/document/empresas")])
       .then(([resContadores, resEmpresas]) => {
-        console.log("Contadores:", resContadores.data);
-        console.log("Empresas:", resEmpresas.data);
-
         setContadores(resContadores.data);
         setEmpresas(resEmpresas.data);
 
@@ -44,11 +42,42 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
       .finally(() => setLoading(false));
   }, [isOpen]);
 
-  const handleSalvar = async () => {
-    if (!contadorSelecionado) {
-      setErro("Selecione um contador");
+  // Quando a empresa selecionada mudar, carrega os contadores já vinculados
+  useEffect(() => {
+    if (!empresaSelecionada?.EMPcpfCNPJ) {
+      setCheckedContadores(new Set());
       return;
     }
+
+    const carregarVinculos = async () => {
+      try {
+        const res = await api.get(
+          `/contador/vinculos-por-cnpj/${empresaSelecionada.EMPcpfCNPJ}`,
+        );
+        // res.data é um array de contadorId (número)
+        setCheckedContadores(new Set(res.data));
+      } catch (err) {
+        console.error("Erro ao carregar vínculos:", err);
+        setCheckedContadores(new Set());
+      }
+    };
+
+    carregarVinculos();
+  }, [empresaSelecionada]);
+
+  const handleCheckboxChange = (contadorId) => {
+    setCheckedContadores((prev) => {
+      const novo = new Set(prev);
+      if (novo.has(contadorId)) {
+        novo.delete(contadorId);
+      } else {
+        novo.add(contadorId);
+      }
+      return novo;
+    });
+  };
+
+  const handleSalvar = async () => {
     if (!empresaSelecionada) {
       setErro("Selecione uma empresa");
       return;
@@ -58,13 +87,14 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
     setErro("");
 
     try {
-      await api.post(`/contador/${contadorSelecionado.idContador}/vinculos`, {
-        cnpj: empresaSelecionada.EMPcpfCNPJ,
+      const contadorIds = Array.from(checkedContadores);
+      await api.put(`/contador/vinculos/${empresaSelecionada.EMPcpfCNPJ}`, {
+        contadorIds,
       });
       onSaved();
       onClose();
     } catch (err) {
-      setErro(err.response?.data?.error || "Erro ao vincular contador");
+      setErro(err.response?.data?.error || "Erro ao salvar vínculos");
     } finally {
       setSalvando(false);
     }
@@ -80,9 +110,9 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
       >
         <div className="modal-header">
           <div>
-            <h2 className="modal-title">Vincular Contador</h2>
+            <h2 className="modal-title">Gerenciar Vínculos de Contadores</h2>
             <p className="modal-desc">
-              Selecione um contador e a empresa a ser vinculada
+              Selecione uma empresa e marque os contadores que terão acesso
             </p>
           </div>
           <button className="action-btn" onClick={onClose}>
@@ -140,7 +170,7 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
           )}
         </div>
 
-        {/* Lista de Contadores */}
+        {/* Lista de Contadores com checkboxes */}
         <div className="contador-list">
           {loading ? (
             <div style={{ padding: 32, textAlign: "center", color: "#94a3b8" }}>
@@ -152,18 +182,17 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
             </div>
           ) : (
             contadores.map((c) => {
-              const isSelected = contadorSelecionado?.id === c.id;
+              const isChecked = checkedContadores.has(c.idContador);
               return (
                 <label
                   key={c.id}
-                  className={`contador-item ${isSelected ? "contador-item--selected" : ""}`}
+                  className={`contador-item ${isChecked ? "contador-item--selected" : ""}`}
                 >
                   <input
-                    type="radio"
-                    name="contador"
-                    checked={isSelected}
-                    onChange={() => setContadorSelecionado(c)}
-                    className="contador-radio"
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handleCheckboxChange(c.idContador)}
+                    className="contador-checkbox"
                   />
                   <div className="contador-avatar">
                     {c.name
@@ -177,7 +206,7 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
                     <div className="contador-email">{c.email}</div>
                     <div className="contador-cpf">CPF: {maskCPF(c.cpf)}</div>
                   </div>
-                  {isSelected && (
+                  {isChecked && (
                     <svg
                       className="contador-check"
                       viewBox="0 0 24 24"
@@ -203,9 +232,9 @@ export default function AdcContadorModal({ isOpen, onClose, onSaved }) {
           <button
             className="btn-confirm"
             onClick={handleSalvar}
-            disabled={salvando || !contadorSelecionado || !empresaSelecionada}
+            disabled={salvando || !empresaSelecionada}
           >
-            {salvando ? "Vinculando..." : "Vincular Contador"}
+            {salvando ? "Salvando..." : "Salvar Vínculos"}
           </button>
         </div>
       </div>

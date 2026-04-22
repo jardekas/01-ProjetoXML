@@ -79,7 +79,8 @@ function DocumentTable({
       const ids = selected.join(",");
       const primeiroDoc = documentos.find((doc) => doc.id === selected[0]);
       const docCnpj = primeiroDoc?.EMPcpfCNPJ;
-      const cnpjParaDownload = user.flg_conta ? docCnpj : user.EMPcpfCNPJ;
+      const cnpjParaDownload =
+        user.flg_conta || user.flg_master ? docCnpj : user.EMPcpfCNPJ;
       const token = localStorage.getItem("token");
 
       if (!cnpjParaDownload) {
@@ -112,7 +113,8 @@ function DocumentTable({
   const handleDownload = async (docId, docCnpj) => {
     try {
       const token = localStorage.getItem("token");
-      const cnpjParaDownload = user.flg_conta ? docCnpj : user.EMPcpfCNPJ;
+      const cnpjParaDownload =
+        user.flg_conta || user.flg_master ? docCnpj : user.EMPcpfCNPJ;
       const response = await api.get(
         `/document/${cnpjParaDownload}/download?id=${docId}`,
         {

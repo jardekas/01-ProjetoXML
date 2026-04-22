@@ -1,5 +1,3 @@
-// utils/relatorioUtils.js
-
 export const formatarData = (dataStr) => {
   if (!dataStr) return "";
   const [dia, mes, ano] = dataStr.split("/");
@@ -17,41 +15,40 @@ export const gerarHTMLRelatorio = (
   documentos,
   periodoInicio,
   periodoFim,
-  userType, // "contador" | "empresa"
+  userType,
 ) => {
-  const titulo =
-    userType === "contador"
-      ? "Nota Fiscal Eletrônica - Por XML (Visão Contador)"
-      : "Nota Fiscal Eletrônica - Por XML";
+  const isContador = userType === "contador" || userType === "master";
 
-  const colunas =
-    userType === "contador"
-      ? ["TIPO", "STATUS", "DATA", "DOCUMENTO", "EMITENTE", "VALOR"]
-      : ["TIPO", "STATUS", "DATA", "DOCUMENTO", "CLIENTE/FORNECEDOR", "VALOR"];
+  const titulo = isContador
+    ? "Nota Fiscal Eletrônica - Por XML (Visão Contador)"
+    : "Nota Fiscal Eletrônica - Por XML";
+
+  const labelNome = isContador ? "EMITENTE" : "CLIENTE/FORNECEDOR";
 
   let linhas = "";
   let totalValor = 0;
 
-  documentos.forEach((doc) => {
-    const tipo = doc.tipo || "";
-    const status = doc.status || "";
-    const data = doc.data || "";
-    const numero = doc.numero || "";
-    const nome =
-      userType === "contador"
-        ? doc.cliente // que é o nomeEmp para contador
-        : doc.cliente; // que é nomeCli para empresa
+  documentos.forEach((doc, i) => {
+    const tipo = doc.tipo || "—";
+    const status = doc.status || "—";
+    const data = doc.data || "—";
+    const numero = doc.numero || "—";
+    const nome = doc.cliente || "—";
+    const cnpj = doc.clienteCNPJ || "—";
     const valor = doc.valor || 0;
     totalValor += valor;
 
+    const classe = i % 2 === 0 ? "linha-par" : "linha-impar";
+
     linhas += `
-      <tr>
-        <td>${tipo}</td>
-        <td>${status}</td>
-        <td>${data}</td>
-        <td>${numero}</td>
-        <td>${nome}</td>
-        <td style="text-align: right;">${formatarMoeda(valor)}</td>
+      <tr class="${classe}">
+        <td class="col-tipo">${tipo}</td>
+        <td class="col-status">${status}</td>
+        <td class="col-data">${data}</td>
+        <td class="col-doc">${numero}</td>
+        <td class="col-nome">${nome}</td>
+        <td class="col-cnpj">${cnpj}</td>
+        <td class="col-valor">${formatarMoeda(valor)}</td>
       </tr>
     `;
   });
@@ -66,92 +63,158 @@ export const gerarHTMLRelatorio = (
       <meta charset="UTF-8">
       <title>Relatório Fiscal</title>
       <style>
+      
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-          font-family: 'Courier New', monospace;
-          margin: 30px;
-          color: #000;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 11px;
+          color: #1a1a1a;
+          background: #fff;
+          padding: 20px 24px;
         }
+
         .header {
-          text-align: center;
-          margin-bottom: 20px;
+          padding-bottom: 2px;
+          margin-bottom: 4px;
         }
+
         .header h2 {
-          margin: 0;
-          font-size: 18px;
-          font-weight: bold;
+          font-size: 15px;
+          font-weight: 700;
+          color: #555;
+          margin-bottom: 4px;
         }
+
         .header p {
-          margin: 5px 0;
-          font-size: 14px;
+          font-size: 11px;
+          color: #555;
         }
-        .periodo {
-          text-align: right;
-          font-size: 14px;
-          margin-bottom: 10px;
-        }
+
         table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 12px;
           table-layout: fixed;
-          word-wrap: break-word;
+          -webkit-print-color-adjust: exact; 
+          print-color-adjust: exact;
         }
-        th, td {
-          border: 1px solid #000;
-          padding: 5px 8px;
-          text-align: left;
-          overflow: hidden;
-          text-overflow: ellipsis;
+
+        thead tr {
+          background: #576cc8;
+          color: #fff;
         }
+
         th {
-          background-color: #f0f0f0;
-          font-weight: bold;
+          padding: 7px 8px;
+          text-align: left;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          border: 1px solid #1a3a8f;
         }
-          th:nth-child(1) { width: 6%; }   
-          th:nth-child(2) { width: 10%; }  
-          th:nth-child(3) { width: 10%; }  
-          th:nth-child(4) { width: 12%; }  
-          th:nth-child(5) { width: 42%; }  
-          th:nth-child(6) { width: 20%; }  
-        .total-row {
-          font-weight: bold;
-          background-color: #e0e0e0;
+
+        td {
+          padding: 6px 8px;
+          font-size: 10.5px;
+          border: 1px solid #e2e8f0;
+          vertical-align: middle;
+          word-break: break-word;
         }
+
+        .linha-par td {
+          background: #ffffff !important;
+        }
+
+        .linha-impar td {
+          background: #A39EA8 !important;
+        }
+
+        /* Larguras fixas e previsíveis */
+        .col-tipo   { width: 55px; }
+        .col-status { width: 85px; }
+        .col-data   { width: 80px; }
+        .col-doc    { width: 100px; text-align: center; }
+        .col-nome   { width: 220px; }
+        .col-cnpj   { width: 120px; }
+        .col-valor  { width: 95px; text-align: right; }
+
+        th.col-doc   { text-align: center; }
+        th.col-valor { text-align: right; }
+
+        tr {
+          page-break-inside: avoid;
+        }
+
+        .total-row td {
+          font-weight: 700;
+          background: #e8f0fe !important;
+          border-top: 2px solid #e2e8f0;
+        }
+
         .footer {
-          margin-top: 20px;
-          font-size: 12px;
+          margin-top: 14px;
+          font-size: 10px;
+          color: #666;
+          display: flex;
+          justify-content: space-between;
         }
+
         @media print {
-          body { margin: 10mm; }
+
+          body { padding: 10mm 12mm; }
+
           table { page-break-inside: auto; }
-          tr { page-break-inside: avoid; page-break-after: auto; }
-          thead { display: table-header-group; }  
-          tfoot { display: table-footer-group; }
+
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+
+          thead {
+            display: table-header-group;
+          }
         }
       </style>
     </head>
+
     <body>
       <div class="header">
         <h2>Totalizador Fiscal: ${titulo}</h2>
-        <p>Período: ${periodoInicio} a ${periodoFim}</p>
+        <p>
+          Período: ${periodoInicio} a ${periodoFim}
+          &nbsp;|&nbsp;
+          Gerado em: ${new Date().toLocaleDateString("pt-BR")}
+        </p>
       </div>
+
       <table>
         <thead>
           <tr>
-            ${colunas.map((c) => `<th>${c}</th>`).join("")}
+            <th class="col-tipo">TIPO</th>
+            <th class="col-status">STATUS</th>
+            <th class="col-data">DATA</th>
+            <th class="col-doc">DOCUMENTO</th>
+            <th class="col-nome">${labelNome}</th>
+            <th class="col-cnpj">CNPJ</th>
+            <th class="col-valor">VALOR</th>
           </tr>
         </thead>
+
         <tbody>
           ${linhas}
+
           <tr class="total-row">
-            <td colspan="5" style="text-align: right;">TOTAL</td>
-            <td style="text-align: right;">${totalFormatado}</td>
+            <td colspan="6" style="text-align:right; padding-right:12px;">
+              TOTAL (${quantidade} documentos)
+            </td>
+            <td class="col-valor">${totalFormatado}</td>
           </tr>
         </tbody>
       </table>
+
       <div class="footer">
-        <p>Quantidade de notas: ${quantidade}</p>
-        <p>Data de emissão: ${new Date().toLocaleDateString("pt-BR")}</p>
+        <span>Quantidade de notas: <strong>${quantidade}</strong></span>
+        <span>Portal Contador — Gestão Fiscal</span>
       </div>
     </body>
     </html>

@@ -46,3 +46,28 @@ export const removeVinculo = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getContadoresByCnpj = async (req, res) => {
+  try {
+    const { cnpj } = req.params;
+    const ids = await ContadorModel.getContadoresByCnpj(cnpj);
+    // Retorna um array simples de contadorId
+    res.json(ids.map((item) => item.contadorId));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const syncVinculos = async (req, res) => {
+  try {
+    const { cnpj } = req.params;
+    const { contadorIds } = req.body;
+    if (!Array.isArray(contadorIds)) {
+      return res.status(400).json({ error: "contadorIds deve ser um array" });
+    }
+    await ContadorModel.syncVinculos(cnpj, contadorIds);
+    res.json({ message: "Vínculos atualizados com sucesso" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
