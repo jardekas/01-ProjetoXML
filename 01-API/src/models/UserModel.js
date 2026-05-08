@@ -35,9 +35,12 @@ export const UserModel = {
     });
   },
 
-  async update(id, data) {
+  async update(identifier, data) {
     return await prisma.user.update({
-      where: { id },
+      where:
+        typeof identifier === "number"
+          ? { id: identifier }
+          : { email: identifier },
       data,
     });
   },

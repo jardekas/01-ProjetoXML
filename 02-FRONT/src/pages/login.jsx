@@ -56,9 +56,10 @@ export default function Login() {
     navigate("/redefinir_Senha");
   };
 
+  /*Retirado devido função de cadastro ser feita apenas por administradores, Mas pode ser reativada futuramente caso seja necessário
   const handleCadastro = () => {
     navigate("/cadastro");
-  };
+  };*/
 
   return (
     <div className="login-container">
@@ -114,7 +115,7 @@ export default function Login() {
         <div className="logo-area">
           <div className="">
             <img
-              src="../../public/SgMat_Icon4.ico"
+              src="../../public/Menor.ico"
               alt="Portal Contador Logo"
               className="logo-image"
             />
@@ -270,13 +271,13 @@ export default function Login() {
               >
                 Esqueci a senha
               </button>
-              <button
+              {/*<button
                 type="button"
                 className="Cadastrar-link-button"
                 onClick={handleCadastro}
               >
                 Fazer Cadastro
-              </button>
+              </button>*/}
             </div>
             {/* entrar no portal */}
             <button type="submit" className="submit-button" disabled={loading}>
@@ -299,7 +300,7 @@ export default function Login() {
             <button className="link-button">Contate o suporte</button>
           </p>
           <p className="copyright">
-            © {new Date().getFullYear()} Portal Contador · v2.4.1
+            © 2026 - {new Date().getFullYear()} Portal Contador · v2.4.1
           </p>
         </div>
       </div>

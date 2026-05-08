@@ -15,5 +15,6 @@ router.post("/usuario/cadastro", createUser);
 router.get("/usuario", getUsers);
 router.put("/usuario/editar/:userID", updateUser);
 router.put("/usuario/delete/:userID", deleteUser);
+router.put("/usuario/Pass/:email", updateUser);
 
 export default router;
