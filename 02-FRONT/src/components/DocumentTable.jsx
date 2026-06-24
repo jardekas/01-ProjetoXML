@@ -1,4 +1,5 @@
 import api from "../services/api";
+import DanfeModal from "./DanfeModal";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import {
@@ -46,26 +47,22 @@ function DocumentTable({
 }) {
   const [hoverRow, setHoverRow] = useState(null);
   const [loadingXml, setLoadingXml] = useState(false);
+  const [abrirDanfe, setAbrirDanfe] = useState(false);
+  const [xmlSelecionado, setXmlSelecionado] = useState(null);
 
   const handleVisualizar = async (doc) => {
     setLoadingXml(true);
+
     try {
       const response = await api.get(`/document/visualizar/${doc.id}`);
       const xml = response.data.xml;
 
-      const pdfResponse = await api.post(
-        "/api/danfe/gerar",
-        { xml },
-        { responseType: "blob" },
-      );
-
-      const url = window.URL.createObjectURL(
-        new Blob([pdfResponse.data], { type: "application/pdf" }),
-      );
-      window.open(url, "_blank");
+      // abrir modal DANFE
+      setXmlSelecionado(xml);
+      setAbrirDanfe(true);
     } catch (error) {
       alert(
-        "Erro ao gerar DANFE: " +
+        "Erro ao visualizar DANFE: " +
           (error.response?.data?.error || error.message),
       );
     } finally {
@@ -361,6 +358,12 @@ function DocumentTable({
           <button className="doc-table-page-btn">1</button>
         </div>
       </div>
+
+      <DanfeModal
+        isOpen={abrirDanfe}
+        onClose={() => setAbrirDanfe(false)}
+        xmlString={xmlSelecionado}
+      />
     </div>
   );
 }

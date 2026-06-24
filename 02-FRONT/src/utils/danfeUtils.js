@@ -1,5 +1,9 @@
 // utils/danfeUtils.js
 
+// ─────────────────────────────────────────────
+// Helpers internos
+// ─────────────────────────────────────────────
+
 const parseXMLString = (xmlString) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlString, "application/xml");
@@ -14,6 +18,10 @@ const getTagValue = (parent, tagName) => {
   const el = parent?.getElementsByTagName(tagName)[0];
   return el?.textContent || "";
 };
+
+// ─────────────────────────────────────────────
+// Extração de dados da NF-e
+// ─────────────────────────────────────────────
 
 const extrairDadosNFe = (xmlDoc) => {
   let nfe = xmlDoc.getElementsByTagName("NFe")[0];
@@ -204,6 +212,22 @@ const extrairDadosNFe = (xmlDoc) => {
   };
 };
 
+// ─────────────────────────────────────────────
+// API pública — exportada para uso no modal
+// ─────────────────────────────────────────────
+
+/**
+ * Recebe uma string XML e devolve o objeto de dados da NF-e.
+ * Use quando precisar dos dados antes de gerar o HTML (ex.: DanfeModal).
+ */
+export const parsearXMLParaDados = (xmlString) => {
+  const xmlDoc = parseXMLString(xmlString);
+  return extrairDadosNFe(xmlDoc);
+};
+
+/**
+ * Gera o HTML completo do DANFE a partir do objeto de dados.
+ */
 export const gerarHTMLDanfe = (dados) => {
   const formatarMoeda = (valor) =>
     valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -248,7 +272,7 @@ export const gerarHTMLDanfe = (dados) => {
   .text-right { text-align: right; }
   .info-box { border: 1px solid #000; padding: 3px; margin-bottom: 5px; }
   .footer { margin-top: 10px; text-align: center; }
-  @media print { body { margin: 5px; } .no-print { display: none; } }
+  @media print { body { margin: 5mm; } .no-print { display: none; } }
 </style></head>
 <body>
 <div class="danfe">
@@ -292,7 +316,16 @@ export const gerarHTMLDanfe = (dados) => {
   </table>
   <table>
     <tr><th>Base ICMS</th><th>Valor ICMS</th><th>Frete</th><th>Seguro</th><th>Outras Desp</th><th>IPI</th><th>Total Produtos</th><th>Total Nota</th></tr>
-    <tr><td>${formatarMoeda(dados.totais.baseICMS)}</td><td>${formatarMoeda(dados.totais.valorICMS)}</td><td>${formatarMoeda(dados.totais.valorFrete)}</td><td>${formatarMoeda(dados.totais.valorSeguro)}</td><td>${formatarMoeda(dados.totais.outrasDespesas)}</td><td>${formatarMoeda(dados.totais.valorIPI)}</td><td>${formatarMoeda(dados.totais.valorTotalProdutos)}</td><td>${formatarMoeda(dados.totais.valorTotalNota)}</td></tr>
+    <tr>
+      <td>${formatarMoeda(dados.totais.baseICMS)}</td>
+      <td>${formatarMoeda(dados.totais.valorICMS)}</td>
+      <td>${formatarMoeda(dados.totais.valorFrete)}</td>
+      <td>${formatarMoeda(dados.totais.valorSeguro)}</td>
+      <td>${formatarMoeda(dados.totais.outrasDespesas)}</td>
+      <td>${formatarMoeda(dados.totais.valorIPI)}</td>
+      <td>${formatarMoeda(dados.totais.valorTotalProdutos)}</td>
+      <td>${formatarMoeda(dados.totais.valorTotalNota)}</td>
+    </tr>
   </table>
   ${
     dados.transportador
@@ -310,16 +343,19 @@ export const gerarHTMLDanfe = (dados) => {
     ${dados.informacoesComplementares ? `<br>${dados.informacoesComplementares}` : ""}
   </div>
   <div class="footer no-print">
-    <button onclick="window.print()">Imprimir DANFE</button>
+
   </div>
 </div>
 </body></html>`;
 };
 
+/**
+ * Atalho: recebe XML string, abre nova aba e imprime.
+ * Mantido para compatibilidade com usos existentes.
+ */
 export const abrirDanfe = (xmlString) => {
   try {
-    const xmlDoc = parseXMLString(xmlString);
-    const dados = extrairDadosNFe(xmlDoc);
+    const dados = parsearXMLParaDados(xmlString);
     const html = gerarHTMLDanfe(dados);
     const win = window.open("", "_blank");
     win.document.write(html);

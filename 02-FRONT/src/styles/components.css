@@ -766,3 +766,17 @@
     transform: translateY(0);
   }
 }
+
+.select-dropdown__search {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  outline: none;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.select-dropdown__search:focus {
+  border-bottom-color: #1d4ed8;
+}

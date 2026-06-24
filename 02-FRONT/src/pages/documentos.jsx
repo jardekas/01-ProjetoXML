@@ -95,6 +95,16 @@ export default function Documentos() {
       return map[Number(modelo)] || "NFSe";
     };
 
+    const parseDataSegura = (dataStr) => {
+      if (!dataStr) return "";
+      // Aceita formatos: "2026-06-23" ou "2026-06-23T10:30:00"
+      const [ano, mes, dia] = dataStr.split("T")[0].split("-");
+      if (ano && mes && dia) {
+        return `${dia}/${mes}/${ano}`;
+      }
+      return "";
+    };
+
     const mapDoc = (doc) => ({
       id: doc.id,
       EMPcpfCNPJ: doc.EMPcpfCNPJ,
@@ -108,7 +118,7 @@ export default function Documentos() {
         : doc.CNPJCli === "00000000000"
           ? "—"
           : doc.CNPJCli || "—",
-      data: doc.data ? new Date(doc.data).toLocaleDateString("pt-BR") : "",
+      data: parseDataSegura(doc.data),
       valor: parseFloat(doc.valor) || 0,
       status: mapStatus(doc.status),
       tipo: mapModelo(doc.modelo),
