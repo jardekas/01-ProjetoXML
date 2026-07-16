@@ -11,10 +11,10 @@ import "../styles/documentos.css";
 
 export default function Documentos() {
   const { user } = useAuth();
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const ITENS_POR_PAGINA = 10;
 
-  /*const [verTodos, setVerTodos] = useState(false);*/
   const [allDocs, setAllDocs] = useState([]);
-  const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
@@ -35,35 +35,11 @@ export default function Documentos() {
   const [periodoFiltro, setPeriodoFiltro] = useState(() => {
     const hoje = new Date();
     return { mes: hoje.getMonth(), ano: hoje.getFullYear() };
-  }); // { mes, ano }
+  });
 
   const userType = user?.flg_conta || user?.flg_master ? "contador" : "empresa";
 
-  const periodoInicio = useMemo(() => {
-    if (!documentos.length) return "—";
-    const datas = documentos
-      .map((d) => d.data)
-      .filter(Boolean)
-      .sort();
-    return datas[0] || "—";
-  }, [documentos]);
-
-  const periodoFim = useMemo(() => {
-    if (!documentos.length) return "—";
-    const datas = documentos
-      .map((d) => d.data)
-      .filter(Boolean)
-      .sort();
-    return datas[datas.length - 1] || "—";
-  }, [documentos]);
-
-  const clientesList = useMemo(() => {
-    const nomesUnicos = [...new Set(allDocs.map((doc) => doc.cliente))].filter(
-      Boolean,
-    );
-    return nomesUnicos.map((nome) => ({ value: nome, label: nome }));
-  }, [allDocs]);
-
+  // Carregar documentos
   const loadDocumentos = useCallback(() => {
     if (!user) return;
 
@@ -79,7 +55,11 @@ export default function Documentos() {
     };
 
     const mapStatus = (status) => {
-      const map = { 100: "Autorizada", 101: "Cancelada", 110: "Com Problema" };
+      const map = {
+        100: "Autorizada",
+        101: "Cancelada",
+        110: "Com Problema",
+      };
       return map[String(status)] || "Com Problema";
     };
 
@@ -97,7 +77,6 @@ export default function Documentos() {
 
     const parseDataSegura = (dataStr) => {
       if (!dataStr) return "";
-      // Aceita formatos: "2026-06-23" ou "2026-06-23T10:30:00"
       const [ano, mes, dia] = dataStr.split("T")[0].split("-");
       if (ano && mes && dia) {
         return `${dia}/${mes}/${ano}`;
@@ -139,18 +118,19 @@ export default function Documentos() {
         const lista = Array.isArray(response.data) ? response.data : [];
         const mapped = lista.map(mapDoc);
         setAllDocs(mapped);
-        setDocumentos(mapped);
       })
       .catch(() => setErro("Erro ao carregar documentos"))
       .finally(() => setLoading(false));
-  }, [user /*, verTodos*/]);
+  }, [user]);
 
+  // Efeito para carregar dados na montagem e quando user mudar
   useEffect(() => {
     loadDocumentos();
   }, [loadDocumentos]);
 
-  useEffect(() => {
-    const filtrados = allDocs.filter((doc) => {
+  // Filtragem
+  const documentosFiltrados = useMemo(() => {
+    return allDocs.filter((doc) => {
       if (busca && !doc.chave?.includes(busca)) return false;
       if (numDoc && !doc.numero?.includes(numDoc)) return false;
       if (
@@ -171,21 +151,70 @@ export default function Documentos() {
       }
       return true;
     });
-    setDocumentos(filtrados);
+  }, [
+    allDocs,
+    busca,
+    numDoc,
+    clienteFiltro,
+    tipoFiltro,
+    statusFiltro,
+    periodoFiltro,
+  ]);
+
+  // Ordenação
+  const sorted = useMemo(() => {
+    if (!sortCol) return documentosFiltrados;
+    return [...documentosFiltrados].sort((a, b) => {
+      let va = a[sortCol],
+        vb = b[sortCol];
+      if (typeof va === "string") {
+        va = va.toLowerCase();
+        vb = vb.toLowerCase();
+      }
+      return sortDir === "asc" ? (va > vb ? 1 : -1) : va < vb ? 1 : -1;
+    });
+  }, [documentosFiltrados, sortCol, sortDir]);
+
+  // Resetar página quando filtros ou ordenação mudarem
+  useEffect(() => {
+    setPaginaAtual(1);
   }, [
     busca,
     numDoc,
     clienteFiltro,
     tipoFiltro,
     statusFiltro,
-    allDocs,
     periodoFiltro,
+    sortCol,
+    sortDir,
   ]);
 
-  const total = allDocs.length;
-  const autorizadas = allDocs.filter((d) => d.status === "Autorizada").length;
-  const problemas = allDocs.filter((d) => d.status === "Com Problema").length;
+  // Ajustar página se ultrapassar total
+  const totalPaginas = Math.ceil(sorted.length / ITENS_POR_PAGINA) || 1;
+  useEffect(() => {
+    if (paginaAtual > totalPaginas) {
+      setPaginaAtual(totalPaginas);
+    }
+  }, [totalPaginas, paginaAtual]);
 
+  // Dados paginados
+  const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+  const fim = Math.min(inicio + ITENS_POR_PAGINA, sorted.length);
+  const documentosPaginados = sorted.slice(inicio, fim);
+
+  // Estatísticas
+  const total = documentosFiltrados.length;
+  const autorizadas = documentosFiltrados.filter(
+    (d) => d.status === "Autorizada",
+  ).length;
+  const canceladas = documentosFiltrados.filter(
+    (d) => d.status === "Cancelada",
+  ).length;
+  const problemas = documentosFiltrados.filter(
+    (d) => d.status === "Com Problema",
+  ).length;
+
+  // Período de exibição
   const periodoExibicao = useMemo(() => {
     if (periodoFiltro) {
       const data = new Date(periodoFiltro.ano, periodoFiltro.mes);
@@ -209,6 +238,31 @@ export default function Documentos() {
       .replace(".", "");
   }, [allDocs, periodoFiltro]);
 
+  const clientesList = useMemo(() => {
+    const nomesUnicos = [...new Set(allDocs.map((doc) => doc.cliente))].filter(
+      Boolean,
+    );
+    return nomesUnicos.map((nome) => ({ value: nome, label: nome }));
+  }, [allDocs]);
+
+  const periodoInicio = useMemo(() => {
+    if (!documentosFiltrados.length) return "—";
+    const datas = documentosFiltrados
+      .map((d) => d.data)
+      .filter(Boolean)
+      .sort();
+    return datas[0] || "—";
+  }, [documentosFiltrados]);
+
+  const periodoFim = useMemo(() => {
+    if (!documentosFiltrados.length) return "—";
+    const datas = documentosFiltrados
+      .map((d) => d.data)
+      .filter(Boolean)
+      .sort();
+    return datas[datas.length - 1] || "—";
+  }, [documentosFiltrados]);
+
   const toggleSelect = (id) =>
     setSelected((s) =>
       s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
@@ -216,7 +270,9 @@ export default function Documentos() {
 
   const toggleAll = () =>
     setSelected(
-      selected.length === documentos.length ? [] : documentos.map((d) => d.id),
+      selected.length === documentosPaginados.length
+        ? []
+        : documentosPaginados.map((d) => d.id),
     );
 
   const handleSort = (col) => {
@@ -226,18 +282,6 @@ export default function Documentos() {
       setSortDir("asc");
     }
   };
-
-  const sorted = sortCol
-    ? [...documentos].sort((a, b) => {
-        let va = a[sortCol],
-          vb = b[sortCol];
-        if (typeof va === "string") {
-          va = va.toLowerCase();
-          vb = vb.toLowerCase();
-        }
-        return sortDir === "asc" ? (va > vb ? 1 : -1) : va < vb ? 1 : -1;
-      })
-    : documentos;
 
   return (
     <div className="documentos-container">
@@ -332,6 +376,25 @@ export default function Documentos() {
                 height="20"
                 viewBox="0 0 24 24"
                 fill="none"
+                stroke="#6b7280"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+            }
+            bgColor="#f3f4f6"
+            value={canceladas}
+            label="Canceladas"
+          />
+          <StatsCard
+            icon={
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
                 stroke="#dc2626"
                 strokeWidth="2"
               >
@@ -388,7 +451,7 @@ export default function Documentos() {
               setOpenSelect={setOpenSelect}
             />
             <DocumentTable
-              documentos={sorted}
+              documentos={documentosPaginados}
               selected={selected}
               onToggleSelect={toggleSelect}
               onToggleAll={toggleAll}
@@ -396,9 +459,11 @@ export default function Documentos() {
               sortDir={sortDir}
               onSort={handleSort}
               user={user}
-              /*verTodos={verTodos}
-              setVerTodos={setVerTodos}*/
               onRefresh={loadDocumentos}
+              // Passando props de paginação para o componente
+              paginaAtual={paginaAtual}
+              totalPaginas={totalPaginas}
+              onPaginaChange={setPaginaAtual}
             />
           </>
         )}
@@ -408,7 +473,7 @@ export default function Documentos() {
       <ImpressModal
         isOpen={impressModal}
         onClose={() => setImpressModal(false)}
-        documentos={documentos}
+        documentos={documentosFiltrados}
         userType={userType}
         periodoInicio={periodoInicio}
         periodoFim={periodoFim}

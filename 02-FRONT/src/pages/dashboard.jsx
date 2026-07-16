@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import KPICard from "../components/KPICard";
 import FilterBar from "../components/FilterBar";
@@ -37,10 +37,15 @@ export default function Dashboard() {
     setCliente("");
     setPeriodo("");
   };
+  const requestIdRef = useRef(0);
 
   const loadDados = useCallback(() => {
     const isContador = user?.flg_conta && user?.idContador;
     if (!isContador && !user?.EMPcpfCNPJ) return;
+    if (!dataInicio || !dataFim) return;
+    if (dataInicio.length < 10 || dataFim.length < 10) return;
+    const currentRequestId = ++requestIdRef.current;
+
     setLoading(true);
     dashboardService
       .getDados(user, dataInicio, dataFim, tipo, cliente)
@@ -51,11 +56,16 @@ export default function Dashboard() {
         setClientes(clientes);
       })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (currentRequestId === requestIdRef.current) setLoading(false);
+      });
   }, [user, dataInicio, dataFim, tipo, cliente]);
 
   useEffect(() => {
-    loadDados();
+    const timeoutId = setTimeout(() => {
+      loadDados();
+    }, 300);
+    return () => clearTimeout(timeoutId);
   }, [loadDados]);
 
   return (

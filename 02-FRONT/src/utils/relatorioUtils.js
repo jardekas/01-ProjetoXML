@@ -25,22 +25,49 @@ export const gerarHTMLRelatorio = (
 
   const labelNome = isContador ? "EMITENTE" : "CLIENTE/FORNECEDOR";
 
-  let linhas = "";
-  let totalValor = 0;
-
-  documentos.forEach((doc, i) => {
-    const tipo = doc.tipo || "—";
-    const status = doc.status || "—";
+  // Agrupar documentos por data
+  const documentosPorData = {};
+  documentos.forEach((doc) => {
     const data = doc.data || "—";
-    const numero = doc.numero || "—";
-    const nome = doc.cliente || "—";
-    const cnpj = doc.clienteCNPJ || "—";
-    const valor = doc.valor || 0;
-    totalValor += valor;
+    if (!documentosPorData[data]) {
+      documentosPorData[data] = [];
+    }
+    documentosPorData[data].push(doc);
+  });
 
-    const classe = i % 2 === 0 ? "linha-par" : "linha-impar";
+  // Ordenar as datas (considerando formato DD/MM/AAAA)
+  const datasOrdenadas = Object.keys(documentosPorData).sort((a, b) => {
+    if (a === "—") return 1;
+    if (b === "—") return -1;
+    const [diaA, mesA, anoA] = a.split("/");
+    const [diaB, mesB, anoB] = b.split("/");
+    return new Date(anoA, mesA - 1, diaA) - new Date(anoB, mesB - 1, diaB);
+  });
 
-    linhas += `
+  let linhas = "";
+  let totalGeral = 0;
+  let totalDocumentos = 0;
+
+  datasOrdenadas.forEach((data, dataIndex) => {
+    const docsDoDia = documentosPorData[data];
+    let totalDia = 0;
+    let qtdDia = 0;
+
+    docsDoDia.forEach((doc, i) => {
+      const tipo = doc.tipo || "—";
+      const status = doc.status || "—";
+      const numero = doc.numero || "—";
+      const nome = doc.cliente || "—";
+      const cnpj = doc.clienteCNPJ || "—";
+      const valor = doc.valor || 0;
+      totalDia += valor;
+      qtdDia++;
+      totalGeral += valor;
+      totalDocumentos++;
+
+      const classe = i % 2 === 0 ? "linha-par" : "linha-impar";
+
+      linhas += `
       <tr class="${classe}">
         <td class="col-tipo">${tipo}</td>
         <td class="col-status">${status}</td>
@@ -51,9 +78,21 @@ export const gerarHTMLRelatorio = (
         <td class="col-valor">${formatarMoeda(valor)}</td>
       </tr>
     `;
+    });
+
+    // Linha de total do dia
+    const classeDia = dataIndex % 2 === 0 ? "total-dia-par" : "total-dia-impar";
+    linhas += `
+      <tr class="total-dia-row ${classeDia}">
+        <td colspan="6" style="text-align:right; padding-right:12px; font-weight:700;">
+          TOTAL DO DIA ${data} (${qtdDia} documentos)
+        </td>
+        <td class="col-valor" style="font-weight:700;">${formatarMoeda(totalDia)}</td>
+      </tr>
+    `;
   });
 
-  const totalFormatado = formatarMoeda(totalValor);
+  const totalFormatado = formatarMoeda(totalGeral);
   const quantidade = documentos.length;
 
   return `
@@ -126,7 +165,20 @@ export const gerarHTMLRelatorio = (
         }
 
         .linha-impar td {
-          background: #A39EA8 !important;
+          background: #f2f2f2 !important;
+        }
+
+        /* Totalizador por dia - tons de verde */
+        .total-dia-par td {
+          background: #d4edda !important;
+          font-weight: 700;
+          border-top: 2px solid #28a745;
+        }
+
+        .total-dia-impar td {
+          background: #c3e6cb !important;
+          font-weight: 700;
+          border-top: 2px solid #28a745;
         }
 
         /* Larguras fixas e previsíveis */
@@ -145,10 +197,12 @@ export const gerarHTMLRelatorio = (
           page-break-inside: avoid;
         }
 
-        .total-row td {
+        /* Total geral - tom de azul */
+        .total-geral-row td {
           font-weight: 700;
           background: #e8f0fe !important;
-          border-top: 2px solid #e2e8f0;
+          border-top: 3px solid #576cc8;
+          font-size: 12px;
         }
 
         .footer {
@@ -203,9 +257,9 @@ export const gerarHTMLRelatorio = (
         <tbody>
           ${linhas}
 
-          <tr class="total-row">
+          <tr class="total-geral-row">
             <td colspan="6" style="text-align:right; padding-right:12px;">
-              TOTAL (${quantidade} documentos)
+              TOTAL GERAL (${quantidade} documentos)
             </td>
             <td class="col-valor">${totalFormatado}</td>
           </tr>

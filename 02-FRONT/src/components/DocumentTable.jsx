@@ -44,6 +44,10 @@ function DocumentTable({
   onSort,
   user,
   onRefresh,
+  //paginação
+  paginaAtual,
+  totalPaginas,
+  onPaginaChange,
 }) {
   const [hoverRow, setHoverRow] = useState(null);
   const [loadingXml, setLoadingXml] = useState(false);
@@ -354,8 +358,25 @@ function DocumentTable({
         <span className="doc-table-footer-info">
           Exibindo <strong>{documentos.length}</strong> documentos
         </span>
+        {/* CONTROLES DE PAGINAÇÃO AGORA AQUI */}
         <div className="doc-table-footer-pagination">
-          <button className="doc-table-page-btn">1</button>
+          <button
+            className="doc-table-page-btn"
+            onClick={() => onPaginaChange(paginaAtual - 1)}
+            disabled={paginaAtual === 1}
+          >
+            ‹
+          </button>
+          <span className="doc-table-page-info">
+            {paginaAtual} / {totalPaginas}
+          </span>
+          <button
+            className="doc-table-page-btn"
+            onClick={() => onPaginaChange(paginaAtual + 1)}
+            disabled={paginaAtual === totalPaginas}
+          >
+            ›
+          </button>
         </div>
       </div>
 
@@ -378,6 +399,10 @@ DocumentTable.propTypes = {
   onSort: PropTypes.func.isRequired,
   user: PropTypes.object.isRequired,
   onRefresh: PropTypes.func.isRequired,
+  //paginação
+  paginaAtual: PropTypes.number.isRequired,
+  totalPaginas: PropTypes.number.isRequired,
+  onPaginaChange: PropTypes.func.isRequired,
 };
 
 export default DocumentTable;
